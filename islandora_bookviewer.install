@@ -80,6 +80,12 @@ function create_js_callback() {
 FILE;
   $path = drupal_get_path('module', 'islandora_bookviewer');
   $filename = "$path/js/islandora_loader.js";
-  file_put_contents($filename, $javascript);
+  $bytes = file_put_contents($filename, $javascript);
+  if ($bytes === FALSE){
+    drupal_error("Failed to create $filename - check the logs and try again");
+  }
+  else {
+    drupal_set_message("Successfully created $filename");
+  }
 
 }
