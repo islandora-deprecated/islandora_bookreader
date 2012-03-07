@@ -128,7 +128,7 @@
       br.bookUrl = br.islandora_prefix + PID;
       br.bookPid = PID;
       // Override the path used to find UI images
-      br.imagesBaseURL = '../images/';
+      br.imagesBaseURL = 'images/';
 
       br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
         return "Embed code not supported in bookreader demo.";
