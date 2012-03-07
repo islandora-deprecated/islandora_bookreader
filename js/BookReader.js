@@ -1169,7 +1169,7 @@ BookReader.prototype.zoom2up = function(direction) {
 
     // If zooming in, reload imgs.  DOM elements will be removed by prepareTwoPageView
     // $$$ An improvement would be to use the low res image until the larger one is loaded.
-    if (this.constMode1up == direction) {
+    if (direction == 1) {
         for (var img in this.prefetchedImgs) {
             delete this.prefetchedImgs[img];
         }
@@ -1732,7 +1732,7 @@ BookReader.prototype.calculateSpreadSize = function() {
 
     // Calculate page sizes and total leaf width
     var spreadSize;
-    if ( this.twoPage.autofit) {
+    if (this.twoPage.autofit) {
         spreadSize = this.getIdealSpreadSize(firstIndex, secondIndex);
     } else {
         // set based on reduction factor
@@ -1788,7 +1788,6 @@ BookReader.prototype.calculateSpreadSize = function() {
     this.twoPage.bookSpineDivHeight = this.twoPage.height + 2*this.twoPage.coverInternalPadding;
     this.twoPage.bookSpineDivLeft = this.twoPage.middle - (this.twoPage.bookSpineDivWidth >> 1);
     this.twoPage.bookSpineDivTop = this.twoPage.bookCoverDivTop;
-
 
     this.reduce = spreadSize.reduce; // $$$ really set this here?
 }
