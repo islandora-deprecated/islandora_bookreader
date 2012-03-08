@@ -86,7 +86,6 @@ function islandora_bookviewer_get_mods($page) {
   global $base_url;
   $url = $base_url . ":8080/saxon/SaxonServlet?source=" . $base_url . "/fedora/repository/" . $page . "/MODS&style=" . $base_url . "/" . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl";
   $http = drupal_http_request($url);
-  //return $http->data;
   print $http->data;
   return;
 }
@@ -100,7 +99,7 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
   $confirmation_message = ($djatoka_avail ? '<img src="' . url('misc/watchdog-ok.png') . '"/>'
           . t('Djatoka url is valid.') : '<img src="'
           . url('misc/watchdog-error.png') . '"/> '
-          . t('Unable to locate djatoka installtion at !tile_path</p>', array('!tile_path' => $djatoka_path)));
+          . t('Unable to locate djatoka installation at !tile_path</p>', array('!tile_path' => $djatoka_path)));
 
   $form['book_ahah_wrapper']['islandora_djatoka_path'] = array(
     '#type' => 'textfield',
@@ -119,6 +118,7 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#value' => $confirmation_message,
   );
 }
+
 /**
  * Provides page information for Bookviewer
  * To be invoked with ajax
@@ -131,13 +131,13 @@ function islandora_bookviewer_setup($pid) {
   global $base_url;
   $item = new Fedora_Item($pid);
   $label = $item->objectProfile->objLabel;
-  //$djatoka_prefix = "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=";
   $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
   $islandora_prefix = $base_url . '/fedora/repository/';
   $fedora_prefix = variable_get('fedora_base_url', 'http:8080/fedora');
   $book_pids = get_page_pids($pid);
   $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $book_pids[count($book_pids)] . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
   $pageData = json_decode(file_get_contents($filename));
+  $pageProgression = get_page_progression($pid);
   $configs = array();
   $configs['DJATOKA_PREFIX'] = $djatoka_prefix;
   $configs['ISLANDORA_PREFIX'] = $islandora_prefix;
@@ -147,10 +147,9 @@ function islandora_bookviewer_setup($pid) {
   $configs['page_width'] = $pageData->width;
   $configs['page_height'] = $pageData->height;
   $configs['page_count'] = count($book_pids);
+  $configs['page_progression'] = $pageProgression;
   $configs['label'] = $label;
 
   $json = json_encode($configs);
   echo $json;
 }
-
-
