@@ -36,9 +36,9 @@
       br.fedora_prefix = islandora_params.FEDORA_PREFIX;
       br.width = parseInt(islandora_params.page_width);
       br.height = parseInt(islandora_params.page_height);
+      br.pageProgression = islandora_params.page_progression;
       br.structMap = islandora_params.book_pids;
       br.compression = islandora_params.COMPRESSION;
-
       br.getPageWidth = function(index) {
         return br.width;
       }
@@ -73,8 +73,9 @@
 
       // Return which side, left or right, that a given page should be displayed on
       br.getPageSide = function(index) {
-        $vals = ["R", "L"];
-        return $vals[index & 0x1];
+        //$vals = ["R", "L"];
+        //return $vals[index & 0x1];
+        return br.pageProgression.toUpperCase()[1-(index & 0x1)]
       }
 
       // This function returns the left and right indices for the user-visible
@@ -147,4 +148,3 @@
 
   </body>
 </html>
-
