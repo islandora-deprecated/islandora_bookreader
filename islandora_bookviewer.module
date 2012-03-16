@@ -41,9 +41,9 @@ function islandora_bookviewer_menu() {
     //'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['mods2html/%'] = array(
+  $items['mods2html/%/%'] = array(
     'page callback' => 'islandora_bookviewer_get_mods',
-    'page arguments' => array(1),
+    'page arguments' => array(1, 2),
     'access callback' => TRUE,
     //'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -82,11 +82,20 @@ function islandora_bookviewer_perm(){
   return $page_path;
   } */
 
-function islandora_bookviewer_get_mods($page) {
+function islandora_bookviewer_get_mods($pageL, $pageR) {
   global $base_url;
-  $url = $base_url . ":8080/saxon/SaxonServlet?source=" . $base_url . "/fedora/repository/" . $page . "/MODS&style=" . $base_url . "/" . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl";
-  $http = drupal_http_request($url);
-  print $http->data;
+  $url1 = $base_url . ":8080/saxon/SaxonServlet?source=" . $base_url . "/fedora/repository/";
+  $url2 = "/MODS&style=" . $base_url . "/" . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl";
+
+  $httpL = "";
+  $httpR = "";
+  if ($pageL != "-") {
+    $httpL = drupal_http_request($url1 . $pageL . $url2)->data;
+  }
+  if ($pageR != "-") {
+    $httpR = drupal_http_request($url1 . $pageR . $url2)->data;
+  }
+  print "<div><div>" . $httpL . "</div><div>" . $httpR . "</div></div>";
   return;
 }
 
