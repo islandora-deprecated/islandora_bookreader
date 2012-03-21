@@ -1,0 +1,18 @@
+#modsTop {
+}
+
+#modsRight {
+  float: right;
+  width: 250px;
+  background-color: #ff0000;
+}
+
+#modsLeft {
+  float: left;
+  width: 250px;
+  background-color: #00ff00;
+}
+
+.modsContainer {
+  background-color: #cccccc;
+}
