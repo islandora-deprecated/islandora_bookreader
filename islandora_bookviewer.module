@@ -95,7 +95,7 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
   if ($pageR != "-") {
     $httpR = drupal_http_request($url1 . $pageR . $url2)->data;
   }
-  print "<div><div>" . $httpL . "</div><div>" . $httpR . "</div></div>";
+  print '<div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div>';
   return;
 }
 
