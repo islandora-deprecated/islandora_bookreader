@@ -53,7 +53,13 @@ function islandora_bookviewer_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('view fedora collection'),
   );
-
+  $items['ocrsearch/%/%'] = array(
+    'page callback' => 'islandora_bookviewer_ocr_search',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    //'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
 
   //experimental - do not expose
   $items['bookreader/standalone'] = array(
@@ -90,7 +96,38 @@ function islandora_bookviewer_get_mods($page) {
   return;
 }
 
-
+function islandora_bookviewer_ocr_search($book, $ocr_term) {
+  global $base_url;
+  $url = $base_url .":8080/solr/select/?q=ds_OCR_t:\"". $ocr_term ."\"+rels_isPageOf_uri_ms:\"". $book ."\"&version=2.2&start=0&fl=PID,rels_isPageNumber_uri_ms&wt=json";
+  $json = drupal_http_request($url);
+  if (is_callable('json_decode')) {
+    $result_obj = json_decode($json->data);
+  }
+  else {
+    //break shit
+    watchdog('islandora_bookviewer', 'No json_decode, herp derp.', array(), WATCHDOG_ERROR);
+  }
+  $output = array('matches' => array());
+  foreach ($result_obj->response->docs as $doc) {
+    $output['matches'][] = array(
+      'text' => $doc->PID,
+      'par' => array(
+        array(
+          'page' => intval(str_replace($doc->rels_isPageNumber_uri_ms[0], "info:fedora/", "")),
+          'boxes' => array(),
+        )
+      )
+    );
+  }
+  /*array('matches' => array(
+    array(
+      'text' => whatever,
+    ),
+   ));
+  */
+  drupal_json($output);
+  return;
+}
 
 function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &$form_state) {
 
