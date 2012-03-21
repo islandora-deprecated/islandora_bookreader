@@ -25,7 +25,7 @@
 </xsl:template>
 
 <xsl:template match="mods:mods">
-  <table>
+  <table class="modsContainer">
   <xsl:apply-templates/>
   </table>
   <hr/>
@@ -34,25 +34,25 @@
 <xsl:template match="*">
   <xsl:choose>
     <xsl:when test="child::*">
-      <tr><td colspan="2"><b>
+      <tr><td colspan="2" class="modsLabelTop">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
         </xsl:with-param>
       </xsl:call-template>
       <xsl:call-template name="attr"/>
-      </b></td></tr>
+      </td></tr>
       <xsl:apply-templates mode="level2"/>
     </xsl:when>
     <xsl:otherwise>
-      <tr><td><b>
+      <tr><td class="modsLabelTop">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
         </xsl:with-param>
       </xsl:call-template>
       <xsl:call-template name="attr"/>
-      </b></td><td>
+      </td><td class="modsValueTop">
       <xsl:call-template name="formatValue"/>
       </td></tr>
     </xsl:otherwise>
@@ -62,7 +62,7 @@
 <xsl:template name="formatValue">
   <xsl:choose>
     <xsl:when test="@type='uri'">
-      <a href="{text()}">
+      <a href="{text()}" class="modsLink">
       <xsl:value-of select="text()"/>
       </a>
     </xsl:when>
@@ -75,7 +75,7 @@
 <xsl:template match="*" mode="level2">
   <xsl:choose>
     <xsl:when test="child::*">
-      <tr><td colspan="2"><p style="margin-left: 1em">
+      <tr><td colspan="2" class="modsLabelLevel2><p style="margin-left: 1em">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
@@ -86,14 +86,14 @@
       <xsl:apply-templates mode="level3"/>
     </xsl:when>
     <xsl:otherwise>
-      <tr><td><p style="margin-left: 1em">
+      <tr><td class="modsLabelLevel2><p style="margin-left: 1em">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
         </xsl:with-param>
       </xsl:call-template>
       <xsl:call-template name="attr"/>
-      </p></td><td>
+      </p></td><td class="modsValueLevel2">
       <xsl:call-template name="formatValue"/>
       </td></tr>
     </xsl:otherwise>
@@ -103,7 +103,7 @@
 <xsl:template match="*" mode="level3">
   <xsl:choose>
     <xsl:when test="child::*">
-      <tr><td colspan="2"><p style="margin-left: 2em">
+      <tr><td colspan="2" class="modsLabelLevel3"><p style="margin-left: 2em">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
@@ -114,14 +114,14 @@
       <xsl:apply-templates mode="level4"/>
     </xsl:when>
     <xsl:otherwise>
-      <tr><td><p style="margin-left: 2em">
+      <tr><td class="modsLabelLevel3"><p style="margin-left: 2em">
       <xsl:call-template name="longName">
         <xsl:with-param name="name">
           <xsl:value-of select="local-name()"/>
         </xsl:with-param>
       </xsl:call-template>
       <xsl:call-template name="attr"/>
-      </p></td><td>
+      </p></td><td class="modsValueLevel3">
       <xsl:call-template name="formatValue"/>
       </td></tr>
     </xsl:otherwise>
