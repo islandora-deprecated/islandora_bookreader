@@ -4582,7 +4582,7 @@ BookReader.prototype.searchHighlightVisible = function() {
     var results = this.searchResults;
     if (null == results) return false;
 
-    var visiblePages = NULL;
+    var visiblePages = null;
     if (this.constMode2up == this.mode) {
         visiblePages = Array(this.twoPage.currentIndexL, this.twoPage.currentIndexR);
     } else if (this.constMode1up == this.mode) {
