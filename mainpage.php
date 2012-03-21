@@ -39,11 +39,12 @@
       br.pageProgression = islandora_params.page_progression;
       br.structMap = islandora_params.book_pids;
       br.compression = islandora_params.COMPRESSION;
+
       br.getPageWidth = function(index) {
         return br.width;
       }
 
-      // Return the height of a given page.  Here we assume all images are 1200 pixels high
+      // Return the height of a given page.
       br.getPageHeight = function(index) {
         return br.height;
       }
@@ -108,6 +109,25 @@
         return spreadIndices;
       }
 
+      br.search = function(term) {
+
+        url = "http://hpitt.thepitt.local/ocrsearch/" + br.bookPid + "/" + escape(term)
+        term = term.replace(/\//g, ' '); // strip slashes, since this goes in the url
+        this.searchTerm = term;
+
+        this.removeSearchResults();
+        this.showProgressPopup('<img id="searchmarker" src="'+this.imagesBaseURL + 'marker_srch-on.png'+'"> Search results will appear below...');
+//         $.ajax({url:url, dataType:'jsonp', jsonpCallback:'br.BRSearchCallback'});
+        $.ajax({url:url, dataType:'json',
+          success: function(data, status, xhr) {
+            alert(data);
+          },
+          error: function() {
+            alert("Search call to " + url + " failed");
+          }
+        });
+      }
+
       // For a given "accessible page index" return the page number in the book.
       //
       // For example, index 5 might correspond to "Page 1" if there is front matter such
@@ -138,13 +158,39 @@
       // Let's go!
       br.init();
 
+      function getURLParam(name) {
+        // get query string part of url into its own variable
+        var url = window.location.href;
+        var query_string = url.split("?");
+
+        // make array of all name/value pairs in query string
+        var params = query_string[1].split(/\&|#/);
+
+        // loop through the parameters
+        var i = 0;
+        while (params.length > i) {
+          // compare param name against arg passed in
+          var param_item = params[i].split("=");
+          if (param_item[0] == name) {
+              // if they match, return the value
+              return param_item[1];
+          }
+          i++;
+        }
+        return "";
+      }
+
+      var query = getURLParam("solrq");
+      if (query != "") {
+        br.search(query);
+      }
+
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();
       $('#textSrch').hide();
       $('#btnSrch').hide();
 
     </script>
-
 
   </body>
 </html>
