@@ -3722,11 +3722,17 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     // $$$ Don't hardcode ids
     var self = this;
     jToolbar.find('.share').colorbox({inline: true, opacity: "0.5", href: "#BRshare", onLoad: function() { self.autoStop(); self.ttsStop(); } });
-    jToolbar.find('.info').colorbox({inline: true, opacity: "0.5", href: "#BRinfo", onLoad: function() { self.autoStop(); self.ttsStop(); } });
+    jToolbar.find('.info').colorbox({inline: true, opacity: "0.5", href: "#BRinfo",
+      onLoad: function() {
+        self.autoStop(); self.ttsStop();
+        self.buildInfoDiv($('#BRinfo'));
+      }
+    });
 
     $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).appendTo($('body'));
 
-    $('#BRinfo .BRfloatTitle a').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
+    //$('#BRinfo .BRfloatTitle div').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
+    $('#BRinfo .BRfloatTitle div').text('Please wait ... loading metadata');
 
     // These functions can be overridden
     this.buildInfoDiv($('#BRinfo'));
@@ -3748,7 +3754,7 @@ BookReader.prototype.blankInfoDiv = function() {
                 '</div>',
                 '<div class="BRfloatMeta">',
                     '<div class="BRfloatTitle">',
-                        '<h2><a/></h2>',
+                        '<h2><div/></h2>',
                     '</div>',
                 '</div>',
             '</div>',
@@ -5272,7 +5278,12 @@ BookReader.prototype.buildShareDiv = function(jShareDiv)
 // Should be overridden
 BookReader.prototype.buildInfoDiv = function(jInfoDiv)
 {
-    jInfoDiv.find('.BRfloatTitle a').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    //jInfoDiv.find('.BRfloatTitle div').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    $.get(this.getModsURI(this.currentIndex()),
+      function(data) {
+        jInfoDiv.find('.BRfloatTitle div').html(data);
+      }
+    );
 }
 
 // Can be overriden

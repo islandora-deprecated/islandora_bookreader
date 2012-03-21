@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/BookReader.css"/>
     <!-- Custom CSS overrides -->
     <link rel="stylesheet" type="text/css" href="css/BookReaderDemo.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mods2html.css"/>
 
     <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
@@ -66,8 +67,15 @@
       }
 
       br.getModsURI = function(index) {
-        var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
-        return br.islandora_prefix + leafStr + "/MODS";
+        //var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
+        //return br.islandora_prefix + leafStr + "/MODS";
+        //return "/mods2html/" + leafStr;
+        var indices = br.getSpreadIndices(index);
+        var pidL = br.structMap[indices[0]+1]; // pid for left page
+        var pidR = br.structMap[indices[1]+1]; // pid for right page
+        if (typeof pidL == 'undefined') { pidL = '-'; }
+        if (typeof pidR == 'undefined') { pidR = '-'; }
+        return "/mods2html/" + pidL + "/" + pidR;
       }
 
       br.getPid = function (index) {
@@ -124,6 +132,7 @@
         $.ajax({url:url, dataType:'json',
           success: function(data, status, xhr) {
             br.BRSearchCallback(data);
+
           },
           error: function() {
             alert("Search call to " + url + " failed");
