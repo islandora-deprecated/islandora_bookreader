@@ -146,7 +146,7 @@
       }
 
       br.leafNumToIndex = function(index) {
-        return index;
+        return index-1;
       }
 
       // Total number of leafs
