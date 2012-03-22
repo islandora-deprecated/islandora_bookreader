@@ -28,7 +28,7 @@
   <table class="modsContainer">
   <xsl:apply-templates/>
   </table>
-  <hr/>
+  <!--hr/-->
 </xsl:template>
 
 <xsl:template match="*">
