@@ -50,9 +50,6 @@
         return br.height;
       }
 
-      br.leafNumToIndex = function(index) {
-        return index;
-      }
       // We load the images from fedora
       // using a different URL structure
       br.getPageURI = function(index, reduce, rotate) {
@@ -132,7 +129,6 @@
         $.ajax({url:url, dataType:'json',
           success: function(data, status, xhr) {
             br.BRSearchCallback(data);
-
           },
           error: function() {
             alert("Search call to " + url + " failed");
@@ -147,6 +143,10 @@
       // for now we just show the image number
       br.getPageNum = function(index) {
         return index+1;
+      }
+
+      br.leafNumToIndex = function(index) {
+        return index;
       }
 
       // Total number of leafs
