@@ -3,12 +3,12 @@
 }
 
 #modsRight {
-  /*float: right;*/
+  float: right;
   width: 270px;
 }
 
 #modsLeft {
-  /*float: left;*/
+  float: left;
   width: 270px;
 }
 
