@@ -90,18 +90,30 @@ function islandora_bookviewer_perm(){
 
 function islandora_bookviewer_get_mods($pageL, $pageR) {
   global $base_url;
+
+  /*
   $url1 = $base_url . ":8080/saxon/SaxonServlet?source=" . $base_url . "/fedora/repository/";
   $url2 = "/MODS&style=" . $base_url . "/" . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl";
+  */
+  $xmlL = new DOMDocument;
+  $xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS");
+  $xmlR = new DOMDocument;
+  $xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS");
+
+  $proc = new XSLTProcessor;
 
   $httpL = "";
   $httpR = "";
   if ($pageL != "-") {
-    $httpL = drupal_http_request($url1 . $pageL . $url2)->data;
+    //$httpL = drupal_http_request($url1 . $pageL . $url2)->data;
+    $httpL = $proc->transformToXML($xmlL);
   }
   if ($pageR != "-") {
-    $httpR = drupal_http_request($url1 . $pageR . $url2)->data;
+    //$httpR = drupal_http_request($url1 . $pageR . $url2)->data;
+    $httpR = $proc->transformToXML($xmlR);
   }
   print '<div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div>';
+
   return;
 }
 
@@ -116,6 +128,8 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
   else {
     //break shit
     watchdog('islandora_bookviewer', 'No json_decode, herp derp.', array(), WATCHDOG_ERROR);
+    // send back something empty
+    return;
   }
   $output = array('matches' => array());
   foreach ($result_obj->response->docs as $doc) {
