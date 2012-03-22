@@ -101,7 +101,7 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
   $xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS");
 
   $proc = new XSLTProcessor;
-  $stylesheet = DOMDocument;
+  $stylesheet = new DOMDocument;
   $stylesheet->load($base_url ."/". drupal_get_path('module', 'islandora_bookviewer') ."/mods2html.xsl");
   $proc->importStyleSheet($stylesheet);
 
