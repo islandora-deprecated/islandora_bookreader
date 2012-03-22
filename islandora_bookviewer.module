@@ -123,7 +123,7 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
       'text' => $doc->PID,
       'par' => array(
         array(
-          'page' => intval(str_replace($doc->rels_isPageNumber_uri_ms[0], "info:fedora/", "")),
+          'page' => intval(str_replace("info:fedora/", "", $doc->rels_isPageNumber_uri_ms[0])),
           'boxes' => array(),
         )
       )
