@@ -3731,8 +3731,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 
     $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).appendTo($('body'));
 
-    //$('#BRinfo .BRfloatTitle div').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
-    $('#BRinfo .BRfloatTitle div').text('Please wait ... loading metadata');
+    //$('#BRinfo .BRfloatMeta').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
+    $('#BRinfo .BRfloatMeta').text('Please wait ... loading metadata');
 
     // These functions can be overridden
     this.buildInfoDiv($('#BRinfo'));
@@ -3749,17 +3749,8 @@ BookReader.prototype.blankInfoDiv = function() {
             '<div class="BRfloatHead">About this book',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
-            '<div class="BRfloatBody">',
-                '<div class="BRfloatCover">',
-                '</div>',
-                '<div class="BRfloatMeta">',
-                    '<div class="BRfloatTitle">',
-                        '<h2><div/></h2>',
-                    '</div>',
-                '</div>',
+            '<div class="BRfloatMeta">',
             '</div>',
-            '<div class="BRfloatFoot">',
-                '<a href="http://openlibrary.org/dev/docs/bookreader">About the BookReader</a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -5278,10 +5269,10 @@ BookReader.prototype.buildShareDiv = function(jShareDiv)
 // Should be overridden
 BookReader.prototype.buildInfoDiv = function(jInfoDiv)
 {
-    //jInfoDiv.find('.BRfloatTitle div').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    //jInfoDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
     $.get(this.getModsURI(this.currentIndex()),
       function(data) {
-        jInfoDiv.find('.BRfloatTitle div').html(data);
+        jInfoDiv.find('.BRfloatMeta').html(data);
       }
     );
 }
