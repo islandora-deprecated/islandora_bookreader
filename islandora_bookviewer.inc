@@ -13,6 +13,8 @@ class IslandoraBookviewer {
     }
   }
 
+/*
+// old launch function
   function showBookViewer() {
     global $base_url;
     $path = drupal_get_path('module', 'islandora_bookviewer');
@@ -25,9 +27,9 @@ class IslandoraBookviewer {
     $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
+*/
 
   // an ajax callback has been added in the module
-
   function showAjaxBookViewer($page = 'mainpage.php') {
     global $base_url;
     $path = drupal_get_path('module', 'islandora_bookviewer');
