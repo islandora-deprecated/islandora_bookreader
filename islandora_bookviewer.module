@@ -88,6 +88,23 @@ function islandora_bookviewer_perm(){
   return $page_path;
   } */
 
+  /*
+   This function will have to be generalized to an arbitrary number of arguments for fjm
+   see the drupal page http://drupal.org/node/626918 for details.
+
+   The emphasis is:
+   1) The wildcards in the drupal menu hook don't really matter - set it to something (maybe the mimimum required)
+   2) the callback should scan the arguments manually
+
+    function islandora_bookviewer_get_mods() {
+      $nargs=func_num_args();
+      for ($i = 0;$i < $nargs;$i++) {
+        print '/'.func_get_arg($i);
+      }
+      ...
+    }
+
+  */
 function islandora_bookviewer_get_mods($pageL, $pageR) {
   global $base_url;
 
