@@ -91,15 +91,6 @@ function islandora_bookviewer_perm(){
 function islandora_bookviewer_get_mods($pageL, $pageR) {
   global $base_url;
 
-  /*
-  $url1 = $base_url . ":8080/saxon/SaxonServlet?source=" . $base_url . "/fedora/repository/";
-  $url2 = "/MODS&style=" . $base_url . "/" . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl";
-  */
-  $xmlL = new DOMDocument;
-  $xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS");
-  $xmlR = new DOMDocument;
-  $xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS");
-
   $proc = new XSLTProcessor;
   $stylesheet = new DOMDocument;
   $stylesheet->load($base_url ."/". drupal_get_path('module', 'islandora_bookviewer') ."/mods2html.xsl");
@@ -108,14 +99,19 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
   $httpL = "";
   $httpR = "";
   if ($pageL != "-") {
-    //$httpL = drupal_http_request($url1 . $pageL . $url2)->data;
-    $httpL = $proc->transformToXML($xmlL);
+    $xmlL = new DOMDocument;
+    if ($xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS")) {
+      $httpL = $proc->transformToXML($xmlL);
+    }
   }
   if ($pageR != "-") {
-    //$httpR = drupal_http_request($url1 . $pageR . $url2)->data;
-    $httpR = $proc->transformToXML($xmlR);
+    $xmlR = new DOMDocument;
+    if ($xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS")) {
+      $httpR = $proc->transformToXML($xmlR);
+    }
   }
   print '<div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div>';
+  //print '<div class="click panel"><div class="front><div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div></div><div class="back"></div></div>';
 
   return;
 }
