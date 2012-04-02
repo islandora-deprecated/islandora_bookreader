@@ -1,9 +1,6 @@
-// Created Wed Mar  7 09:19:09 2012
-// This file is generated dynamically during the Drupal installation process.
-// Any changes made to this file will be lost on reinstallation.
-// Clone and rename this file if changes are to survive module reactivation.
+//function to parse urls
 
-    $.urlParam = function(name){
+$.urlParam = function(name){
   var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
   if (!results)
   {
@@ -12,17 +9,31 @@
   return results[1] || 0;
 }
 
-  PID = $.urlParam('pid');
+PID = $.urlParam('pid');
 
-  $.ajax({
-    url:'http://localhost/Development/bookreader/setup/' + PID,
-    async:false,
-    success: function(data, status, xhr) {
-      islandora_params = data;
-    },
-    error: function() {
-      alert("AJAX call failed");
-    },
-    dataType: 'json'
-  });
+//determine base of Drupal installation
 
+var here = window.location.toString();
+var splitter = here.indexOf('/sites/');
+if(splitter > 0){
+  splitter = '/sites/';
+}else{
+  splitter = '/modules/';
+}
+var base = here.split(splitter);
+base = base[0];
+
+
+// retreive setup info from Drupal callback
+
+$.ajax({
+  url: base + '/bookreader/setup/' + PID,
+  async:false,
+  success: function(data, status, xhr) {
+    islandora_params = data;
+  },
+  error: function() {
+    alert("AJAX call failed");
+  },
+  dataType: 'json'
+});
