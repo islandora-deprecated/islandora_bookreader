@@ -35,7 +35,7 @@ function islandora_bookviewer_help($path, $arg) {
 
 function islandora_bookviewer_menu() {
 /*
-   $items['getbookpage/%'] = array(
+  $items['getbookpage/%'] = array(
     'page callback' => 'islandora_bookviewer_get_book_page',
     'page arguments' => array(1),
     'access callback' => TRUE,
@@ -71,16 +71,16 @@ function islandora_bookviewer_menu() {
    // 'access arguments' => array('view fedora collection'),
     'access_callback'=>TRUE
   );
-  */
+*/
   return $items;
 }
-
 
 function islandora_bookviewer_perm(){
   return array('use bookreader');
 }
+
 /*
-  function islandora_bookviewer_get_book_page($page) {
+function islandora_bookviewer_get_book_page($page) {
   global $base_url;
 
   // the preferred page
@@ -89,16 +89,16 @@ function islandora_bookviewer_perm(){
   $page_path = $base_url ."/drupal/fedora/repository/". $page ."/JP2";
 
   return $page_path;
-  }
+}
 */
 
 /*
- This function will have to be generalized to an arbitrary number of arguments for fjm
- see the drupal page http://drupal.org/node/626918 for details.
+  This function will have to be generalized to an arbitrary number of arguments for fjm
+  see the drupal page http://drupal.org/node/626918 for details.
 
- The emphasis is:
- 1) The wildcards in the drupal menu hook don't really matter - set it to something (maybe the mimimum required)
- 2) the callback should scan the arguments manually
+  The emphasis is:
+  1) The wildcards in the drupal menu hook don't really matter - set it to something (maybe the mimimum required)
+  2) the callback should scan the arguments manually
 
   function islandora_bookviewer_get_mods() {
     $nargs=func_num_args();
@@ -107,8 +107,8 @@ function islandora_bookviewer_perm(){
     }
     ...
   }
-
 */
+
 function islandora_bookviewer_get_mods($pageL, $pageR) {
   global $base_url;
 
@@ -121,13 +121,21 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
   $httpR = "";
   if ($pageL != "-") {
     $xmlL = new DOMDocument;
-    if ($xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS")) {
+    if (@$xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS") === FALSE) {
+      // an error - probably can't find/access the file
+    }
+    else {
+      // process document
       $httpL = $proc->transformToXML($xmlL);
     }
   }
   if ($pageR != "-") {
     $xmlR = new DOMDocument;
-    if ($xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS")) {
+    if (@$xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS") === FALSE) {
+      // an error - probably can't find/access the file
+    }
+    else {
+      // process document
       $httpR = $proc->transformToXML($xmlR);
     }
   }
