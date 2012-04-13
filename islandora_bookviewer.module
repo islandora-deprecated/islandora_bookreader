@@ -126,7 +126,7 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
  * @param string $pid
  */
 function islandora_bookviewer_setup($pid) {
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  //module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   global $base_url;
   $item = new Fedora_Item($pid);
@@ -134,8 +134,9 @@ function islandora_bookviewer_setup($pid) {
   //$djatoka_prefix = "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=";
   $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
   $islandora_prefix = $base_url . '/fedora/repository/';
-  $fedora_prefix = variable_get('fedora_base_url', 'http:8080/fedora');
-  $book_pids = get_sorted_pages($pid);
+  $fedora_prefix = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
+  $fedora_prefix = islandora_bookviewer_inject_creds($fedora_prefix);
+  $book_pids = islandora_bookviewer_get_sorted_pages($pid);
   $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $book_pids[count($book_pids)] . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
   $pageData = json_decode(file_get_contents($filename));
   $configs = array();
@@ -151,6 +152,61 @@ function islandora_bookviewer_setup($pid) {
 
   $json = json_encode($configs);
   echo $json;
+}
+
+
+/**
+ * pulled this out of book_pack_utils as different viewers may want to use different queries
+ * 
+ * 
+ * @param string $book_pid
+ *  the pid of the book object
+ * @return array
+ *  an array of pids, one for each page ordered by sequence number 
+ */
+function islandora_bookviewer_get_sorted_pages($book_pid) {
+  $query = <<<XML
+  select \$object \$page from <#ri>
+where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
+order by \$page
+XML;
+
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
+    $number = (string)$result->page[0];
+    $book_pids[$number] = $page;
+  }
+
+  return $book_pids;
+}
+
+/** 
+ * add the username and password of ANONYMOUS and ANONYMOUS
+ * this will get us by sites where fedora apia calls ask for credentials the drupal servlet filter
+ * should recognize ANONYMOUS as the islandora anonymous user
+ * @todo possibly add real drupal username and password hash here for sites where there might be
+ * xacml
+ * 
+ * @param string $fedora_prefix
+ * @return string 
+ */
+function islandora_bookviewer_inject_creds( $fedora_prefix){
+  $parts = array();
+  $parts = parse_url($fedora_prefix);
+  $parts['user'] = 'ANONYMOUS';
+  $parts['pass'] = 'ANONYMOUS';
+  $fedora_prefix = $parts['scheme'].'://'.$parts['user'].':'.$parts['pass'].'@'.$parts['host'].':'.$parts['port'].$parts['path'];
+  
+  return $fedora_prefix;
+  
 }
 
 
