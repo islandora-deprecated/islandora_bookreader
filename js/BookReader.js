@@ -3689,6 +3689,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     }
 
     $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    $('#BRreturn a').attr("target", "_parent");// we don't want this to reload in the iframe so go back to parent
 
     $('#BRtoolbar .BRnavCntl').addClass('BRup');
     $('#BRtoolbar .pause').hide();
@@ -3743,10 +3744,15 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 
 }
 
+//hijack this function to show OCR we will need to update the icon
 BookReader.prototype.blankInfoDiv = function() {
+  var pid = this.structMap[index+1]
+    var url = this.islandora_prefix+'/'+pid+'/'+'OCR';
+
+    var ocr = $.ajax({url:url, dataType:'text'});
     return $([
         '<div class="BRfloat" id="BRinfo">',
-            '<div class="BRfloatHead">About this book',
+            '<div class="BRfloatBody">'+pid,
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
             '<div class="BRfloatMeta">',
@@ -5296,7 +5302,7 @@ BookReader.prototype.initUIStrings = function()
                    '.bookmark': 'Bookmark this page',
                    '.read': 'Read this book aloud',
                    '.share': 'Share this book',
-                   '.info': 'About this book',
+                   '.info': 'Page Text',
                    '.full': 'Show fullscreen',
                    '.book_left': 'Flip left',
                    '.book_right': 'Flip right',

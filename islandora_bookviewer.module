@@ -243,3 +243,60 @@ function islandora_bookviewer_setup($pid) {
   $json = json_encode($configs);
   echo $json;
 }
+
+
+/**
+ * pulled this out of book_pack_utils as different viewers may want to use different queries
+ * 
+ * 
+ * @param string $book_pid
+ *  the pid of the book object
+ * @return array
+ *  an array of pids, one for each page ordered by sequence number 
+ */
+function islandora_bookviewer_get_sorted_page_pids($book_pid) {
+  $query = <<<XML
+  select \$object \$page from <#ri>
+where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
+order by \$page
+XML;
+
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
+    $number = (string)$result->page[0];
+    $book_pids[$number] = $page;
+  }
+
+  return $book_pids;
+}
+
+/**
+ * add the username and password of ANONYMOUS and ANONYMOUS
+ * this will get us by sites where fedora apia calls ask for credentials the drupal servlet filter
+ * should recognize ANONYMOUS as the islandora anonymous user
+ * @todo possibly add real drupal username and password hash here for sites where there might be
+ * xacml
+ * 
+ * @param string $fedora_prefix
+ * @return string 
+ */
+function islandora_bookviewer_inject_creds( $fedora_prefix){
+  $parts = array();
+  $parts = parse_url($fedora_prefix);
+  $parts['user'] = 'ANONYMOUS';
+  $parts['pass'] = 'ANONYMOUS';
+  $fedora_prefix = $parts['scheme'].'://'.$parts['user'].':'.$parts['pass'].'@'.$parts['host'].':'.$parts['port'].$parts['path'];
+  
+  return $fedora_prefix;
+  
+}
+
+

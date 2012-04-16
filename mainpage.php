@@ -59,7 +59,7 @@
         var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
        // var url = br.djatoka_prefix + br.islandora_prefix + leafStr + '/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
        var url = br.djatoka_prefix + br.fedora_prefix + '/objects/' + leafStr + '/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
-
+        
         return url;
       }
 
@@ -162,7 +162,7 @@
       br.bookPid = PID;
       // Override the path used to find UI images
       br.imagesBaseURL = 'images/';
-
+      br.logoURL = ""; //don't want to go to LOC so init it empty, the title already takes us back to the book
       br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
         return "Embed code not supported in bookreader demo.";
       }
