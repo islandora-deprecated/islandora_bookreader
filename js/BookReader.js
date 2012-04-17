@@ -44,7 +44,7 @@ function BookReader() {
     this.reduce  = 4;
     this.padding = 10;          // Padding in 1up
 
-    this.mode = this.constMode2up;
+    this.mode = this.constMode1up;
     this.ui = 'full';        // UI mode
     this.uiAutoHide = false; // Controls whether nav/toolbar will autohide
 
@@ -80,7 +80,7 @@ function BookReader() {
     this.lastDisplayableIndex2up = null;
 
     // Should be overriden (before init) by custom implmentations.
-    this.logoURL = 'http://www.archive.org';
+    //this.logoURL = 'http://www.archive.org';
 
     // Base URL for UI images - should be overriden (before init) by
     // custom implementations.
@@ -3427,10 +3427,14 @@ BookReader.prototype.initEmbedNavbar = function() {
         +         '<button class="BRicon book_left"></button>'
         +         '<button class="BRicon book_right"></button>'
         +   "</span>"
-        +   "<span><a class='logo' href='" + this.logoURL + "' 'target='_blank' ></a></span>"
-        +   "<span id='BRembedreturn'><a href='" + thisLink + "' target='_blank' ></a></span>"
         + '</div>'
     );
+    if (getURLParam('showIcon') == 1) {
+        $("#BRnav").append(
+            "<span><a class='logo' href='" + this.logoURL + "' target='parent' ></a></span>"
+            +   "<span id='BRembedreturn'><a href='" + thisLink + "' target='parent' ></a></span>"
+        );
+    }
     $('#BRembedreturn a').text(this.bookTitle);
 }
 
@@ -3664,8 +3668,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +     readIcon
         //+     "<button class='BRicon full'></button>"
         +   "</span>"
-        +   "<span><a class='logo' href='" + this.logoURL + "'></a></span>"
-        +   "<span id='BRreturn'><a></a></span>"
+//        +   "<span><a class='logo' href='" + this.logoURL + "'></a></span>"
+//        +   "<span id='BRreturn'><a></a></span>"
         +   "<div id='BRnavCntlTop' class='BRnabrbuvCntl'></div>"
         + "</div>"
         /*
@@ -3680,7 +3684,13 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +   "</div>"
         + "</div>"
         */
+    );
+    if (getURLParam('showIcon') == 1) {
+        $("#BRtoolbar").append(
+            "<span><a class='logo' href='" + this.logoURL + "' target='parent'></a></span>"
+            +   "<span id='BRreturn'><a></a></span>"
         );
+    }
 
     // Browser hack - bug with colorbox on iOS 3 see https://bugs.launchpad.net/bookreader/+bug/686220
     if ( navigator.userAgent.match(/ipad/i) && $.browser.webkit && (parseInt($.browser.version, 10) <= 531) ) {
@@ -3695,9 +3705,9 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 
     this.updateToolbarZoom(this.reduce); // Pretty format
 
-    if (ui == "embed" || ui == "touch") {
-        $("#BookReader a.logo").attr("target","_blank");
-    }
+//    if (ui == "embed" || ui == "touch") {
+//        $("#BookReader a.logo").attr("target","_blank");
+//    }
 
     // $$$ turn this into a member variable
     var jToolbar = $('#BRtoolbar'); // j prefix indicates jQuery object

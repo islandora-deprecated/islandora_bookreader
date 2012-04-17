@@ -62,20 +62,11 @@ function islandora_bookviewer_menu() {
     //'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-/*
-  //experimental - do not expose
-  $items['bookreader/standalone'] = array(
-    'page callback' => 'bookreader',
-    'file' => 'standalone.inc',
-    'type' => MENU_CALLBACK,
-   // 'access arguments' => array('view fedora collection'),
-    'access_callback'=>TRUE
-  );
-*/
+
   return $items;
 }
 
-function islandora_bookviewer_perm(){
+function islandora_bookviewer_perm() {
   return array('use bookreader');
 }
 
@@ -119,7 +110,7 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
 
   $httpL = "";
   $httpR = "";
-  if ($pageL != "-") {
+  if ($pageL !== "-") {
     $xmlL = new DOMDocument;
     if (@$xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS") === FALSE) {
       // an error - probably can't find/access the file
@@ -129,7 +120,7 @@ function islandora_bookviewer_get_mods($pageL, $pageR) {
       $httpL = $proc->transformToXML($xmlL);
     }
   }
-  if ($pageR != "-") {
+  if ($pageR !== "-") {
     $xmlR = new DOMDocument;
     if (@$xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS") === FALSE) {
       // an error - probably can't find/access the file
@@ -206,6 +197,14 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
   $form['book_ahah_wrapper']['infobox3'] = array(
     '#type' => 'item',
     '#value' => $confirmation_message,
+  );
+
+  $show_ia_logo = isset($form_state['values']['islandora_bookviewer_show_ia_logo']) ? $form_state['values']['islandora_bookviewer_show_ia_logo'] : variable_get('islandora_bookviewer_show_ia_logo', TRUE);
+  $form['book_ahah_wrapper']['islandora_bookviewer_show_ia_logo'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show IA icon in bookviewer'),
+    '#description' => t('Show the IA icon and link in the upper left corner of the bookviewer.'),
+    '#default_value' => $show_ia_logo,
   );
 }
 
