@@ -26,7 +26,9 @@ class IslandoraBookviewer {
     //can be embeded but it looks terrible when embedded.  the css would have to be rewritten as most things are set as absolute
     //this will take some time but eventually would be worthwhile as the index php does not have access to drupal functions/variables when loaded as
     //an iframe
-    $viewer_url = $base_url . '/' . $fullPath . "$page?pid=" . $this->pid . '&label=' . $this->item->objectProfile->objLabel . '&showIcon=' . variable_get('islandora_bookviewer_show_ia_logo', '1');
+    $viewer_url = $base_url . '/' . $fullPath . "$page?pid=" . $this->pid . '&label=' . $this->item->objectProfile->objLabel .
+      '&showIcon=' . variable_get('islandora_bookviewer_show_ia_logo', '1') .
+      '&view=' . variable_get('islandora_bookviewer_default_view', '2');
     // if we have a search query then pass it to the viewer (to parse in book)
     if ($query != "") {
       $viewer_url = $viewer_url . '&solrq=' . $query;

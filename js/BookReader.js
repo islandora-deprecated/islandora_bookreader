@@ -44,7 +44,21 @@ function BookReader() {
     this.reduce  = 4;
     this.padding = 10;          // Padding in 1up
 
-    this.mode = this.constMode1up;
+    urlmode = getURLParam('view');
+    switch (urlmode) {
+        case '1':
+            this.mode = this.constMode1up;
+        break;
+        case '2':
+            this.mode = this.constMode2up;
+        break;
+        case '3':
+            this.mode = this.constModeThumb;
+        break;
+        default:
+            this.mode = this.constMode2up;
+        break;
+    }
     this.ui = 'full';        // UI mode
     this.uiAutoHide = false; // Controls whether nav/toolbar will autohide
 
@@ -80,7 +94,7 @@ function BookReader() {
     this.lastDisplayableIndex2up = null;
 
     // Should be overriden (before init) by custom implmentations.
-    //this.logoURL = 'http://www.archive.org';
+    this.logoURL = 'http://www.archive.org';
 
     // Base URL for UI images - should be overriden (before init) by
     // custom implementations.
