@@ -4,5 +4,5 @@ dependencies[] = fedora_repository
 dependencies[] = tabs
 description = Islandora Bookviewer based on the archive.org bookviewer.
 package = Islandora
-version = 6.x-dev
+version = 6.x-12.1-RC1
 core = 6.x
