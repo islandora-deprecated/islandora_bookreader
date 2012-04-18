@@ -13,6 +13,8 @@ class IslandoraBookviewer {
     }
   }
 
+/*
+// old launch function
   function showBookViewer() {
     global $base_url;
     $path = drupal_get_path('module', 'islandora_bookviewer');
@@ -25,20 +27,27 @@ class IslandoraBookviewer {
     $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
-
+*/
 
   // an ajax callback has been added in the module
- 
   function showAjaxBookViewer($page = 'mainpage.php') {
     global $base_url;
     $path = drupal_get_path('module', 'islandora_bookviewer');
     $fullPath = $path . '/';
+
+    // check for a query string - this will be a search-inside query
+    $query = $_GET["solrq"];
+
     //currently we are loading this as a iframe.
     //can be embeded but it looks terrible when embedded.  the css would have to be rewritten as most things are set as absolute
     //this will take some time but eventually would be worthwhile as the index php does not have access to drupal functions/variables when loaded as
     //an iframe
     $viewer_url = $base_url . '/' . $fullPath . "$page?pid=" . $this->pid . '&label=' . $this->item->objectProfile->objLabel;
-    $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    // if we have a search query then pass it to the viewer (to parse in book)
+    if ($query != "") {
+      $viewer_url = $viewer_url . '&solrq=' . $query;
+    }
+    $html = '<iframe id="iabookviewer" name="iabookviewer" src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
 
@@ -76,7 +85,7 @@ class IslandoraBookviewer {
 
     $tabs['View'] = array(
       '#type' => 'tabpage',
-      '#title' => t('View'),
+      '#title' => 'View',
       '#content' => $viewer,
       '#weight' => -1
     );

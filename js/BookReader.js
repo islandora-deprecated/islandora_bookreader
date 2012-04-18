@@ -1169,7 +1169,7 @@ BookReader.prototype.zoom2up = function(direction) {
 
     // If zooming in, reload imgs.  DOM elements will be removed by prepareTwoPageView
     // $$$ An improvement would be to use the low res image until the larger one is loaded.
-    if (this.constMode1up == direction) {
+    if (direction == 1) {
         for (var img in this.prefetchedImgs) {
             delete this.prefetchedImgs[img];
         }
@@ -1732,7 +1732,7 @@ BookReader.prototype.calculateSpreadSize = function() {
 
     // Calculate page sizes and total leaf width
     var spreadSize;
-    if ( this.twoPage.autofit) {
+    if (this.twoPage.autofit) {
         spreadSize = this.getIdealSpreadSize(firstIndex, secondIndex);
     } else {
         // set based on reduction factor
@@ -1788,7 +1788,6 @@ BookReader.prototype.calculateSpreadSize = function() {
     this.twoPage.bookSpineDivHeight = this.twoPage.height + 2*this.twoPage.coverInternalPadding;
     this.twoPage.bookSpineDivLeft = this.twoPage.middle - (this.twoPage.bookSpineDivWidth >> 1);
     this.twoPage.bookSpineDivTop = this.twoPage.bookCoverDivTop;
-
 
     this.reduce = spreadSize.reduce; // $$$ really set this here?
 }
@@ -3661,6 +3660,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
+        +     "<button class='BRicon logo'></buttion>"
+        +     "<button class='BRicon full'></button>"
         +     "<button class='BRicon share'></button>"
         +     readIcon
         //+     "<button class='BRicon full'></button>"
@@ -3690,6 +3691,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     }
 
     $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    $('#BRreturn a').attr("target", "_parent");// we don't want this to reload in the iframe so go back to parent
 
     $('#BRtoolbar .BRnavCntl').addClass('BRup');
     $('#BRtoolbar .pause').hide();
@@ -3723,20 +3725,33 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     // $$$ Don't hardcode ids
     var self = this;
     jToolbar.find('.share').colorbox({inline: true, opacity: "0.5", href: "#BRshare", onLoad: function() { self.autoStop(); self.ttsStop(); } });
-    jToolbar.find('.info').colorbox({inline: true, opacity: "0.5", href: "#BRinfo", onLoad: function() { self.autoStop(); self.ttsStop(); } });
+    jToolbar.find('.info').colorbox({inline: true, opacity: "0.5", href: "#BRinfo",
+      onLoad: function() {
+        self.autoStop(); self.ttsStop();
+        self.buildInfoDiv($('#BRinfo'));
+      }
+    });
+    jToolbar.find('.logo').colorbox({inline: true, opacity: "0.5", href: "#BRocr",
+      onLoad: function() {
+        self.autoStop(); self.ttsStop();
+        self.buildOcrDiv($('#BRocr'));
+      }
+    });
+    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).append(this.blankOcrDiv()).appendTo($('body'));
 
-    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).appendTo($('body'));
-
-    $('#BRinfo .BRfloatTitle a').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
+    //$('#BRinfo .BRfloatMeta').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
+    $('#BRinfo .BRfloatMeta').text('Please wait ... loading metadata');
 
     // These functions can be overridden
     this.buildInfoDiv($('#BRinfo'));
     this.buildShareDiv($('#BRshare'));
+    this.buildOcrDiv ($('#BRocr'));
 
     // Switch to requested mode -- binds other click handlers
     //this.switchToolbarMode(mode);
 
 }
+
 
 BookReader.prototype.blankInfoDiv = function() {
     return $([
@@ -3744,17 +3759,21 @@ BookReader.prototype.blankInfoDiv = function() {
             '<div class="BRfloatHead">About this book',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
-            '<div class="BRfloatBody">',
-                '<div class="BRfloatCover">',
-                '</div>',
-                '<div class="BRfloatMeta">',
-                    '<div class="BRfloatTitle">',
-                        '<h2><a/></h2>',
-                    '</div>',
-                '</div>',
+            '<div class="BRfloatMeta">',
             '</div>',
-            '<div class="BRfloatFoot">',
-                '<a href="http://openlibrary.org/dev/docs/bookreader">About the BookReader</a>',
+            '</div>',
+        '</div>'].join('\n')
+    );
+}
+
+BookReader.prototype.blankOcrDiv = function() {
+     return $([
+        '<div class="BRfloat" id="BRocr">',
+            '<div class="BRfloatHead">Text View',
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+            '</div>',
+            '<div class="BRfloatOcr">',
+            '</div>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -3822,6 +3841,26 @@ BookReader.prototype.updateToolbarZoom = function(reduce) {
         value += '%';
     }
     $('#BRzoom').text(value);
+}
+
+//toggle fullscreen
+BookReader.prototype.fullscreen_toggle = function() 
+{
+
+	var currentURL=window.top.location.href;
+//turn off fullscreen  have seen the booviewer in both directories
+	if(currentURL.indexOf("islandora_bookviewer") > 0 || currentURL.indexOf("islandora_bookreader") > 0)
+	{
+                window.top.location.assign(this.islandora_prefix+this.bookPid);
+               
+	}
+//turn on fullscreen
+	else
+	{
+                var mySite="mainpage.php?pid="+this.bookPid;
+                window.top.location.assign(mySite);
+	}
+
 }
 
 // bindNavigationHandlers
@@ -3942,12 +3981,13 @@ BookReader.prototype.bindNavigationHandlers = function() {
     });
 
     jIcons.filter('.full').bind('click', function() {
-        if (self.ui == 'embed') {
+        //if (self.ui == 'embed') {
             // $$$ bit of a hack, IA-specific
-            var url = (window.location + '').replace("?ui=embed","");
-            window.open(url);
-        }
-
+        //    var url = (window.location + '').replace("?ui=embed","");
+        //    window.open(url);
+        //}
+        //alert('test');
+        self.fullscreen_toggle();
         // Not implemented
     });
 
@@ -4583,7 +4623,7 @@ BookReader.prototype.searchHighlightVisible = function() {
     var results = this.searchResults;
     if (null == results) return false;
 
-    var visiblePages = NULL;
+    var visiblePages = null;
     if (this.constMode2up == this.mode) {
         visiblePages = Array(this.twoPage.currentIndexL, this.twoPage.currentIndexR);
     } else if (this.constMode1up == this.mode) {
@@ -5273,7 +5313,24 @@ BookReader.prototype.buildShareDiv = function(jShareDiv)
 // Should be overridden
 BookReader.prototype.buildInfoDiv = function(jInfoDiv)
 {
-    jInfoDiv.find('.BRfloatTitle a').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    //jInfoDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    $.get(this.getModsURI(this.currentIndex()),
+      function(data) {
+        jInfoDiv.find('.BRfloatMeta').html(data);
+      }
+    );
+}
+
+// Should be overridden
+// pp added
+BookReader.prototype.buildOcrDiv = function(jOcrDiv)
+{
+    //jOcrDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    $.get(this.getOcrURI(this.currentIndex()),
+      function(data) {
+        jOcrDiv.find('.BRfloatOcr').html(data);
+      }
+    );
 }
 
 // Can be overriden
@@ -5295,7 +5352,7 @@ BookReader.prototype.initUIStrings = function()
                    '.bookmark': 'Bookmark this page',
                    '.read': 'Read this book aloud',
                    '.share': 'Share this book',
-                   '.info': 'About this book',
+                   '.info': 'Page Text',
                    '.full': 'Show fullscreen',
                    '.book_left': 'Flip left',
                    '.book_right': 'Flip right',

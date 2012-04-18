@@ -1,218 +1,163 @@
-<xsl:stylesheet xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" exclude-result-prefixes="mods" version="1.0">
-<xsl:output indent="yes" method="html"/>
-<xsl:variable name="dictionary" select="document('http://www.loc.gov/standards/mods/modsDictionary.xml')/dictionary"/>
-<xsl:template match="/">
-<html>
-<head>
-<style type="text/css">TD {vertical-align:top}</style>
-</head>
-<body>
-<xsl:choose>
-<xsl:when test="mods:modsCollection">
-<xsl:apply-templates select="mods:modsCollection"/>
-</xsl:when>
-<xsl:when test="mods:mods">
-<xsl:apply-templates select="mods:mods"/>
-</xsl:when>
-</xsl:choose>
-</body>
-</html>
-</xsl:template>
-<xsl:template match="mods:modsCollection">
-<xsl:apply-templates select="mods:mods"/>
-</xsl:template>
-<xsl:template match="mods:mods">
-<table>
-<xsl:apply-templates/>
-</table>
-<hr/>
-</xsl:template>
-<xsl:template match="*">
-<xsl:choose>
-<xsl:when test="child::*">
-<tr>
-<td colspan="2">
-<b>
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</b>
-</td>
-</tr>
-<xsl:apply-templates mode="level2"/>
-</xsl:when>
-<xsl:otherwise>
-<tr>
-<!--td width="300pt"-->
-<td>
-<b>
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</b>
-</td>
-<td>
-<xsl:call-template name="formatValue"/>
-</td>
-</tr>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-<xsl:template name="formatValue">
-<xsl:choose>
-<xsl:when test="@type='uri'">
-<a href="{text()}">
-<xsl:value-of select="text()"/>
-</a>
-</xsl:when>
-<xsl:otherwise>
-<xsl:value-of select="text()"/>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-<xsl:template match="*" mode="level2">
-<xsl:choose>
-<xsl:when test="child::*">
-<tr>
-<td colspan="2">
-<p style="margin-left: 1em">
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</p>
-</td>
-</tr>
-<xsl:apply-templates mode="level3"/>
-</xsl:when>
-<xsl:otherwise>
-<tr>
-<td>
-<p style="margin-left: 1em">
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</p>
-</td>
-<td>
-<xsl:call-template name="formatValue"/>
-</td>
-</tr>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-<xsl:template match="*" mode="level3">
-<xsl:choose>
-<xsl:when test="child::*">
-<tr>
-<td colspan="2">
-<p style="margin-left: 2em">
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</p>
-</td>
-</tr>
-<xsl:apply-templates mode="level4"/>
-</xsl:when>
-<xsl:otherwise>
-<tr>
-<td>
-<p style="margin-left: 2em">
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</p>
-</td>
-<td>
-<xsl:call-template name="formatValue"/>
-</td>
-</tr>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-<xsl:template match="*" mode="level4">
-<tr>
-<td>
-<p style="margin-left: 3em">
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="local-name()"/>
-</xsl:with-param>
-</xsl:call-template>
-<xsl:call-template name="attr"/>
-</p>
-</td>
-<td>
-<xsl:value-of select="text()"/>
-</td>
-</tr>
-</xsl:template>
-<xsl:template name="longName">
-<xsl:param name="name"/>
-<xsl:choose>
-<xsl:when test="$dictionary/entry[@key=$name]">
-<xsl:value-of select="$dictionary/entry[@key=$name]"/>
-</xsl:when>
-<xsl:otherwise>
-<xsl:value-of select="$name"/>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-<xsl:template name="attr">
-<xsl:for-each select="@type|@point">
-:
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="."/>
-</xsl:with-param>
-</xsl:call-template>
-</xsl:for-each>
-<xsl:if test="@authority or @edition">
-<xsl:for-each select="@authority">
-(
-<xsl:call-template name="longName">
-<xsl:with-param name="name">
-<xsl:value-of select="."/>
-</xsl:with-param>
-</xsl:call-template>
-</xsl:for-each>
-<xsl:if test="@edition">
-Edition
-<xsl:value-of select="@edition"/>
-</xsl:if>
-)
-</xsl:if>
-<xsl:variable name="attrStr">
-<xsl:for-each select="@*[local-name()!='edition' and local-name()!='type' and local-name()!='authority' and local-name()!='point']">
-<xsl:value-of select="local-name()"/>
-="
-<xsl:value-of select="."/>
-",
-</xsl:for-each>
-</xsl:variable>
-<xsl:variable name="nattrStr" select="normalize-space($attrStr)"/>
-<xsl:if test="string-length($nattrStr)">
-(
-<xsl:value-of select="substring($nattrStr,1,string-length($nattrStr)-1)"/>
-)
-</xsl:if>
-</xsl:template>
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:mods="http://www.loc.gov/mods/v3" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" exclude-result-prefixes="mods">
+    <xsl:output method="xml" indent="yes"/>
+    <xsl:template match="*[not(node())]"/> <!-- strip empty elements -->
+    <xsl:template match="/">
+        <html>
+            <head>
+                <style type="text/css">
+#modsRow {
+width: 420px;
+margin: 2px;
+}
+#modsLabel {
+width: 100px;
+font-weight:bold;
+vertical-align:text-top;
+text-align: right;
+padding: 3px;
+}
+#modsValue {
+vertical-align:text-top;
+padding: 3px;
+}
+</style>
+            </head>
+            <body>
+                <table>
+                <xsl:if test="//mods:title/text() [normalize-space(.) ]">
+                    <tr id="modsRow">
+                        <td id="modsLabel">Title:</td><td id="modsValue"><xsl:value-of select="//mods:title"/>
+                            <xsl:if test="//mods:subTitle/text() [normalize-space(.) ]"> : 
+: <xsl:value-of select="//mods:subTitle"/></xsl:if>
+                        </td>
+                        </tr>
+                </xsl:if>
+                    <xsl:if test="//mods:dateCreated/text() [normalize-space(.) ] | //mods:dateIssued/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Date:</td><td id="modsValue"><xsl:value-of select="//mods:dateCreated"/><xsl:value-of select="//mods:dateIssued"/></td>
+                        </tr>
+                    </xsl:if> 
+                    <xsl:for-each select="//mods:name">
+                                <tr id="modsRow">
+                                    <td id="modsLabel">Name:</td><td id="modsValue">
+                                        <xsl:value-of select="mods:namePart"/>
+                                        <br /><xsl:value-of select="mods:role/mods:roleTerm"/>                                   
+                                    </td>
+                                </tr>
+                    </xsl:for-each>
+                  
+                <xsl:if test="//mods:abstract/text() [normalize-space(.) ]">
+                    <tr id="modsRow">
+                        <td id="modsLabel">Abstract:</td><td id="modsValue"><xsl:value-of select="//mods:abstract"/></td>
+                    </tr>
+                </xsl:if> 
+                    <xsl:if test="//mods:identifier/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Identifier:</td><td id="modsValue"><xsl:value-of select="//mods:identifier"/></td>
+                        </tr>
+                    </xsl:if> 
+                    <xsl:if test="//mods:identifier/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Physical Description</td>
+                            <td id="modsValue"><ul>
+                                <xsl:if test="//mods:extent/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:extent"/></li></xsl:if>
+                                <xsl:if test="//mods:form/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:form"/></li></xsl:if>      
+                                
+                                <xsl:if test="//mods:note[not(@*)]/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:note[not(@*)]"/></li></xsl:if>
+                                <xsl:if test="//mods:note[@type='physical']/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:note[@type='physical']"/></li></xsl:if>        
+                                <xsl:if test="//mods:note[@type='details']/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:note[@type='details']"/></li></xsl:if>
+                                <xsl:if test="//mods:scale/text() [normalize-space(.) ]"><li>Scale: <xsl:value-of select="//mods:scale"/></li></xsl:if>
+                                <xsl:if test="//mods:coordinates/text() [normalize-space(.) ]"><li><xsl:value-of select="//mods:coordinates"/></li></xsl:if>
+                                </ul>
+                            </td>
+                        </tr>
+                    </xsl:if> 
+                    <xsl:for-each select="/mods:mods/mods:subject[@authority='paro']/mods:topic/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Topic:</td><td id="modsValue">
+                                <xsl:value-of select="."/>
+                            </td>
+                        </tr>
+                    </xsl:for-each>
+                    <xsl:for-each select="/mods:mods/mods:subject[@authority='lcsh']/mods:topic/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Topic:</td><td id="modsValue">
+                                <xsl:value-of select="."/>
+                            </td>
+                        </tr>
+                    </xsl:for-each>
+                    <xsl:if test="//mods:continent/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Continent:</td><td id="modsValue"><xsl:value-of select="//mods:continent"/></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="//mods:country/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Country:</td><td id="modsValue"><xsl:value-of select="//mods:country"/></td>
+                        </tr>
+                    </xsl:if>
+                    
+                    <xsl:if test="//mods:province/text() [normalize-space(.) ]">
+                    <xsl:for-each select="//mods:province">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Province:</td><td id="modsValue">
+                                <xsl:value-of select="."/>
+                            </td>
+                        </tr>
+                    </xsl:for-each>
+                    </xsl:if>
+                    <xsl:if test="//mods:county/text() [normalize-space(.) ]">
+                        <xsl:for-each select="//mods:county">
+                            <tr id="modsRow">
+                                <td id="modsLabel">County:</td><td id="modsValue">
+                                    <xsl:value-of select="."/>
+                                </td>
+                            </tr>
+                        </xsl:for-each>
+                    </xsl:if>
+                    <xsl:if test="//mods:region/text() [normalize-space(.) ]">
+                        <xsl:for-each select="//mods:region">
+                            <tr id="modsRow">
+                                <td id="modsLabel">Region/Lot:</td><td id="modsValue">
+                                    <xsl:value-of select="."/>
+                                </td>
+                            </tr>
+                        </xsl:for-each>
+                    </xsl:if> 
+                    
+                    <xsl:if test="//mods:city/text() [normalize-space(.) ]">
+                        <xsl:for-each select="//mods:city">
+                            <tr id="modsRow">
+                                <td id="modsLabel">City:</td><td id="modsValue">
+                                    <xsl:value-of select="."/>
+                                </td>
+                            </tr>
+                        </xsl:for-each>
+                    </xsl:if> 
+                        <xsl:if test="//mods:citySection/text() [normalize-space(.) ]">
+                            <tr id="modsRow">
+                                <td id="modsLabel">City Section:</td><td id="modsValue"><xsl:value-of select="//mods:citySection"/></td>
+                            </tr>
+                        </xsl:if>                   
+                    <xsl:if test="//mods:accessCondition[@type='useAndReproduction']/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Use and Reproduction:</td><td id="modsValue"><xsl:value-of select="//mods:accessCondition[@type='useAndReproduction']"/></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="//mods:accessCondition[@type='restrictionOnAccess']/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Restrictions on Access:</td><td id="modsValue"><xsl:value-of select="//mods:accessCondition[@type='restrictionOnAccess']"/></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="//mods:physicalLocation/text() [normalize-space(.) ]">
+                        <tr id="modsRow">
+                            <td id="modsLabel">Physical Location:</td><td id="modsValue"><xsl:value-of select="//mods:physicalLocation"/></td>
+                        </tr>
+                    </xsl:if>
+                    
+                </table>
+            </body>
+        </html>
+    </xsl:template>
 </xsl:stylesheet>

@@ -1,0 +1,56 @@
+#modsTop {
+  font-size: 10px;
+}
+
+#modsRight {
+  float: right;
+  width: 270px;
+}
+
+#modsLeft {
+  float: left;
+  width: 270px;
+}
+
+.ocrTop {
+  font-size: 10px;
+}
+
+.ocrRight {
+  float: right;
+  width: 270px;
+}
+
+.ocrLeft {
+  float: left;
+  width: 270px;
+}
+.ocrContainer{
+    backgrounc-color: #ffffff;
+}
+.modsContainer {
+  background-color: #ffffff;
+}
+
+.modsLabelTop {
+}
+.modsValueTop {
+}
+
+.modsLabelLevel2 {
+  padding-left: 10px;
+}
+.modsValueLevel2 {
+}
+
+.modsLabelLevel3 {
+  padding-left: 20px;
+}
+.modsValueLevel3 {
+}
+
+.modsLabelLevel4 {
+  padding-left: 30px;
+}
+.modsValueLevel4 {
+}
