@@ -3661,6 +3661,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
         +     "<button class='BRicon logo'></buttion>"
+        +     "<button class='BRicon full'></button>"
         +     "<button class='BRicon share'></button>"
         +     readIcon
         //+     "<button class='BRicon full'></button>"
@@ -3842,6 +3843,26 @@ BookReader.prototype.updateToolbarZoom = function(reduce) {
     $('#BRzoom').text(value);
 }
 
+//toggle fullscreen
+BookReader.prototype.fullscreen_toggle = function() 
+{
+
+	var currentURL=window.top.location.href;
+//turn off fullscreen  have seen the booviewer in both directories
+	if(currentURL.indexOf("islandora_bookviewer") > 0 || currentURL.indexOf("islandora_bookreader") > 0)
+	{
+                window.top.location.assign(this.islandora_prefix+this.bookPid);
+               
+	}
+//turn on fullscreen
+	else
+	{
+                var mySite="mainpage.php?pid="+this.bookPid;
+                window.top.location.assign(mySite);
+	}
+
+}
+
 // bindNavigationHandlers
 //______________________________________________________________________________
 // Bind navigation handlers
@@ -3960,12 +3981,13 @@ BookReader.prototype.bindNavigationHandlers = function() {
     });
 
     jIcons.filter('.full').bind('click', function() {
-        if (self.ui == 'embed') {
+        //if (self.ui == 'embed') {
             // $$$ bit of a hack, IA-specific
-            var url = (window.location + '').replace("?ui=embed","");
-            window.open(url);
-        }
-
+        //    var url = (window.location + '').replace("?ui=embed","");
+        //    window.open(url);
+        //}
+        //alert('test');
+        self.fullscreen_toggle();
         // Not implemented
     });
 

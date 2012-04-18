@@ -259,7 +259,6 @@ function islandora_bookviewer_setup($pid) {
   $configs['page_progression'] = $pageProgression;
   $configs['label'] = $label;
   $configs['base_url'] = $base_url;
-  $configs['book_pid'] = $pid;
   $json = json_encode($configs);
   echo $json;
 }

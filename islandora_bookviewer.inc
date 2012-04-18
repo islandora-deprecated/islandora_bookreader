@@ -47,7 +47,7 @@ class IslandoraBookviewer {
     if ($query != "") {
       $viewer_url = $viewer_url . '&solrq=' . $query;
     }
-    $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    $html = '<iframe id="iabookviewer" name="iabookviewer" src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
 
