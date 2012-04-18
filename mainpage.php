@@ -40,7 +40,8 @@
       br.pageProgression = islandora_params.page_progression;
       br.structMap = islandora_params.book_pids;
       br.compression = islandora_params.COMPRESSION;
-
+      br.baseUrl = islandora_params.base_url;
+      br.basePid = islandora_params.book_pid;
       br.getPageWidth = function(index) {
         return br.width;
       }
@@ -62,6 +63,15 @@
         
         return url;
       }
+      
+      br.getOcrURI = function (index){
+        var indices = br.getSpreadIndices(index);
+        var pidL = br.structMap[indices[0]+1]; // pid for left page
+        var pidR = br.structMap[indices[1]+1]; // pid for right page
+        if (typeof pidL == 'undefined') { pidL = '-'; }
+        if (typeof pidR == 'undefined') { pidR = '-'; }
+        return br.baseUrl+"/bookreader/ocr/" + pidL + '/' + pidR ;
+      }
 
       br.getModsURI = function(index) {
         //var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
@@ -72,7 +82,7 @@
         var pidR = br.structMap[indices[1]+1]; // pid for right page
         if (typeof pidL == 'undefined') { pidL = '-'; }
         if (typeof pidR == 'undefined') { pidR = '-'; }
-        return "/mods2html/" + pidL + "/" + pidR;
+        return br.baseUrl+"/mods2html/" + br.bookPid ;
       }
 
       br.getPid = function (index) {
@@ -199,7 +209,7 @@
 
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();
-      $('#textSrch').hide();
+      //$('#textSrch').hide();
       $('#btnSrch').hide();
 
     </script>

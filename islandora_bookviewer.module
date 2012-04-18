@@ -43,9 +43,16 @@ function islandora_bookviewer_menu() {
     'type' => MENU_CALLBACK,
   );
 */
-  $items['mods2html/%/%'] = array(
+  $items['mods2html/%'] = array(
     'page callback' => 'islandora_bookviewer_get_mods',
-    'page arguments' => array(1, 2),
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    //'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['bookreader/ocr/%/%'] = array(
+    'page callback' => 'islandora_bookviewer_get_ocr',
+    'page arguments' => array(2, 3),
     'access callback' => TRUE,
     //'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -109,42 +116,54 @@ function islandora_bookviewer_get_book_page($page) {
   }
 */
 
-function islandora_bookviewer_get_mods($pageL, $pageR) {
+function islandora_bookviewer_get_ocr($pidL = NULL, $pidR = NULL){
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+    $ocrL = "";
+    $ocrR = "";
+    if(isset ($pidL)){
+      $item = new Fedora_Item($pidL);
+      $ocrL = $item->get_datastream_dissemination('OCR');
+    }
+    if(isset ($pidR)){
+      $item = new Fedora_Item($pidR);
+      $ocrR = $item->get_datastream_dissemination('OCR');
+    }
+    print '<div class="ocrTop"><div class="ocrLeft">'.$ocrL.'</div><div class="ocrRight">'.$ocrR.'</div></div>';
+    return;
+    
+  }
+
+
+/**
+ * get the mods record of the book not the page as the solution pack does not include mods at the page level
+ * @global url $base_url
+ * @param string $book_pid
+ * @return type 
+ */
+function islandora_bookviewer_get_mods($book_pid) {
   global $base_url;
 
-  $proc = new XSLTProcessor;
-  $stylesheet = new DOMDocument;
-  $stylesheet->load($base_url ."/". drupal_get_path('module', 'islandora_bookviewer') ."/mods2html.xsl");
+  $proc = new XSLTProcessor();
+  $stylesheet = new DOMDocument();
+  $stylesheet->load($base_url.'/'.drupal_get_path('module', 'islandora_bookviewer') ."/mods2html.xsl");
   $proc->importStyleSheet($stylesheet);
-
-  $httpL = "";
-  $httpR = "";
-  if ($pageL != "-") {
+  $html = "";  
+  if (isset($book_pid)) {
     $xmlL = new DOMDocument;
-    if (@$xmlL->load($base_url ."/fedora/repository/". $pageL ."/MODS") === FALSE) {
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+    $item = new Fedora_Item($book_pid);
+    $mods = $item->get_datastream_dissemination('MODS');//need to get this using Fedora Item in case repo does not allow anonymous access
+    if (@$xmlL->loadXML($mods)) {
       // an error - probably can't find/access the file
-    }
-    else {
-      // process document
-      $httpL = $proc->transformToXML($xmlL);
+      $html = $proc->transformToXML($xmlL);
     }
   }
-  if ($pageR != "-") {
-    $xmlR = new DOMDocument;
-    if (@$xmlR->load($base_url ."/fedora/repository/". $pageR ."/MODS") === FALSE) {
-      // an error - probably can't find/access the file
-    }
-    else {
-      // process document
-      $httpR = $proc->transformToXML($xmlR);
-    }
-  }
-  print '<div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div>';
-  //print '<div class="click panel"><div class="front><div id="modsTop"><div id="modsLeft">' . $httpL . '</div><div id="modsRight">' . $httpR . '</div></div></div><div class="back"></div></div>';
-
-  return;
+   
+    print '<div id="modsTop"><div id="modsLeft">' . $html . '</div></div>';
+    return;
+  
 }
-
+  
 function islandora_bookviewer_ocr_search($book, $ocr_term) {
   global $base_url;
 
@@ -239,7 +258,8 @@ function islandora_bookviewer_setup($pid) {
   $configs['page_count'] = count($book_pids);
   $configs['page_progression'] = $pageProgression;
   $configs['label'] = $label;
-
+  $configs['base_url'] = $base_url;
+  $configs['book_pid'] = $pid;
   $json = json_encode($configs);
   echo $json;
 }

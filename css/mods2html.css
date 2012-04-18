@@ -12,6 +12,22 @@
   width: 270px;
 }
 
+.ocrTop {
+  font-size: 10px;
+}
+
+.ocrRight {
+  float: right;
+  width: 270px;
+}
+
+.ocrLeft {
+  float: left;
+  width: 270px;
+}
+.ocrContainer{
+    backgrounc-color: #ffffff;
+}
 .modsContainer {
   background-color: #ffffff;
 }

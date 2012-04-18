@@ -3660,6 +3660,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
+        +     "<button class='BRicon logo'></buttion>"
         +     "<button class='BRicon share'></button>"
         +     readIcon
         //+     "<button class='BRicon full'></button>"
@@ -3729,8 +3730,13 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         self.buildInfoDiv($('#BRinfo'));
       }
     });
-
-    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).appendTo($('body'));
+    jToolbar.find('.logo').colorbox({inline: true, opacity: "0.5", href: "#BRocr",
+      onLoad: function() {
+        self.autoStop(); self.ttsStop();
+        self.buildOcrDiv($('#BRocr'));
+      }
+    });
+    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).append(this.blankOcrDiv()).appendTo($('body'));
 
     //$('#BRinfo .BRfloatMeta').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
     $('#BRinfo .BRfloatMeta').text('Please wait ... loading metadata');
@@ -3738,24 +3744,34 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     // These functions can be overridden
     this.buildInfoDiv($('#BRinfo'));
     this.buildShareDiv($('#BRshare'));
+    this.buildOcrDiv ($('#BRocr'));
 
     // Switch to requested mode -- binds other click handlers
     //this.switchToolbarMode(mode);
 
 }
 
-//hijack this function to show OCR we will need to update the icon
-BookReader.prototype.blankInfoDiv = function() {
-  var pid = this.structMap[index+1]
-    var url = this.islandora_prefix+'/'+pid+'/'+'OCR';
 
-    var ocr = $.ajax({url:url, dataType:'text'});
+BookReader.prototype.blankInfoDiv = function() {
     return $([
         '<div class="BRfloat" id="BRinfo">',
-            '<div class="BRfloatBody">'+pid,
+            '<div class="BRfloatHead">About this book',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
             '<div class="BRfloatMeta">',
+            '</div>',
+            '</div>',
+        '</div>'].join('\n')
+    );
+}
+
+BookReader.prototype.blankOcrDiv = function() {
+     return $([
+        '<div class="BRfloat" id="BRocr">',
+            '<div class="BRfloatHead">Text View',
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+            '</div>',
+            '<div class="BRfloatOcr">',
             '</div>',
             '</div>',
         '</div>'].join('\n')
@@ -5279,6 +5295,18 @@ BookReader.prototype.buildInfoDiv = function(jInfoDiv)
     $.get(this.getModsURI(this.currentIndex()),
       function(data) {
         jInfoDiv.find('.BRfloatMeta').html(data);
+      }
+    );
+}
+
+// Should be overridden
+// pp added
+BookReader.prototype.buildOcrDiv = function(jOcrDiv)
+{
+    //jOcrDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    $.get(this.getOcrURI(this.currentIndex()),
+      function(data) {
+        jOcrDiv.find('.BRfloatOcr').html(data);
       }
     );
 }
