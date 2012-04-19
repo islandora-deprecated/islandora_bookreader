@@ -134,7 +134,6 @@
 
         this.removeSearchResults();
         this.showProgressPopup('<img id="searchmarker" src="'+this.imagesBaseURL + 'marker_srch-on.png'+'"> Search results will appear below...');
-//         $.ajax({url:url, dataType:'jsonp', jsonpCallback:'br.BRSearchCallback'});
         $.ajax({url:url, dataType:'json',
           success: function(data, status, xhr) {
             br.BRSearchCallback(data);
