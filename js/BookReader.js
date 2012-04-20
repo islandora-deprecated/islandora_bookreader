@@ -3712,6 +3712,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     if ( navigator.userAgent.match(/ipad/i) && $.browser.webkit && (parseInt($.browser.version, 10) <= 531) ) {
        $('#BRtoolbarbuttons .info').hide();
        $('#BRtoolbarbuttons .share').hide();
+       $('#BRtoolbarbuttons .full').hide();// pp
+       $('#BRtoolbarbuttons .logo').hide();// pp
     }
 
     $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
@@ -3761,15 +3763,15 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         self.buildOcrDiv($('#BRocr'));
       }
     });
-    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).append(this.blankOcrDiv()).appendTo($('body'));
+    $('<div style="display: none;"></div>').append(this.blankShareDiv()).append(this.blankInfoDiv()).append(this.blankOcrDiv()).appendTo($('body')); // pp
 
     //$('#BRinfo .BRfloatMeta').attr( {'href': this.bookUrl} ).text(this.bookTitle).addClass('title');
     $('#BRinfo .BRfloatMeta').text('Please wait ... loading metadata');
-
+    $('#BRocr .BRfloatMeta').text('Please wait ... loading text'); //pp
     // These functions can be overridden
     this.buildInfoDiv($('#BRinfo'));
     this.buildShareDiv($('#BRshare'));
-    this.buildOcrDiv ($('#BRocr'));
+    this.buildOcrDiv ($('#BRocr'));  // pp
 
     // Switch to requested mode -- binds other click handlers
     //this.switchToolbarMode(mode);
@@ -3796,7 +3798,7 @@ BookReader.prototype.blankOcrDiv = function() {
             '<div class="BRfloatHead">Text View',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
-            '<div class="BRfloatOcr">',
+            '<div class="BRfloatMeta">',// pp
             '</div>',
             '</div>',
         '</div>'].join('\n')
@@ -3872,6 +3874,7 @@ BookReader.prototype.fullscreen_toggle = function()
 {
 
 	var currentURL=window.top.location.href;
+        var module_path = this.module_path;
 //turn off fullscreen  have seen the booviewer in both directories
 	if(currentURL.indexOf("islandora_bookviewer") > 0 || currentURL.indexOf("islandora_bookreader") > 0)
 	{
@@ -3881,7 +3884,7 @@ BookReader.prototype.fullscreen_toggle = function()
 //turn on fullscreen
 	else
 	{
-                var mySite="mainpage.php?pid="+this.bookPid;
+                var mySite=this.baseUrl+'/'+module_path+"/mainpage.php?pid="+this.bookPid;
                 window.top.location.assign(mySite);
 	}
 
@@ -4005,14 +4008,7 @@ BookReader.prototype.bindNavigationHandlers = function() {
     });
 
     jIcons.filter('.full').bind('click', function() {
-        //if (self.ui == 'embed') {
-            // $$$ bit of a hack, IA-specific
-        //    var url = (window.location + '').replace("?ui=embed","");
-        //    window.open(url);
-        //}
-        //alert('test');
-        self.fullscreen_toggle();
-        // Not implemented
+        self.fullscreen_toggle();// pp
     });
 
     $('.BRnavCntl').click(
@@ -4748,6 +4744,11 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
         $('#BRinfo').remove();
         $('#BRshare').after(self.blankInfoDiv());
         self.buildInfoDiv($('#BRinfo'));
+        
+        // pp
+        $('#BRocr').remove();
+        $('#BRshare').after(self.blankOcrDiv());
+        self.buildOcrDiv($('#BRocr'));
 
         // Check for borrowed book
         if (self.olAuth) {
@@ -5345,16 +5346,19 @@ BookReader.prototype.buildInfoDiv = function(jInfoDiv)
     );
 }
 
-// Should be overridden
+// Shouldo be overridden
 // pp added
 BookReader.prototype.buildOcrDiv = function(jOcrDiv)
 {
-    //jOcrDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
+    //jOcrDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle); 
+     jOcrDiv.height(600);//auto resize is a bit of an issue for this div pages with gibberish ocr maybe too big so 
+                         //setting this to a size that should not overflow for normal text.
     $.get(this.getOcrURI(this.currentIndex()),
       function(data) {
-        jOcrDiv.find('.BRfloatOcr').html(data);
+        jOcrDiv.find('.BRfloatMeta').html(data);
       }
     );
+        
 }
 
 // Can be overriden

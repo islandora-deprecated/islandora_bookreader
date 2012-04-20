@@ -41,6 +41,7 @@
       br.structMap = islandora_params.book_pids;
       br.compression = islandora_params.COMPRESSION;
       br.baseUrl = islandora_params.base_url;
+      br.module_path = islandora_params.module_path;
       br.getPageWidth = function(index) {
         return br.width;
       }

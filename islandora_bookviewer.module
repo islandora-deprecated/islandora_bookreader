@@ -123,10 +123,12 @@ function islandora_bookviewer_get_ocr($pidL = NULL, $pidR = NULL){
     if(isset ($pidL)){
       $item = new Fedora_Item($pidL);
       $ocrL = $item->get_datastream_dissemination('OCR');
+      $ocrL = htmlspecialchars($ocrL);
     }
     if(isset ($pidR)){
       $item = new Fedora_Item($pidR);
       $ocrR = $item->get_datastream_dissemination('OCR');
+      $ocrR = htmlspecialchars($ocrR);
     }
     print '<div class="ocrTop"><div class="ocrLeft">'.$ocrL.'</div><div class="ocrRight">'.$ocrR.'</div></div>';
     return;
@@ -280,6 +282,7 @@ function islandora_bookviewer_setup($pid) {
   $configs['page_progression'] = $pageProgression;
   $configs['label'] = $label;
   $configs['base_url'] = $base_url;
+  $configs['module_path'] = drupal_get_path('module','islandora_bookviewer');
   $json = json_encode($configs);
   echo $json;
 }
