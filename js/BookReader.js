@@ -2780,7 +2780,7 @@ BookReader.prototype.search = function(term) {
     //console.log('search called with term=' + term);
 
     $('#textSrch').blur(); //cause mobile safari to hide the keyboard
-
+    //this.baseUrl+
     var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
     url    += '/fulltext/inside.php?item_id='+this.bookId;
     url    += '&doc='+this.subPrefix;   //TODO: test with subitem

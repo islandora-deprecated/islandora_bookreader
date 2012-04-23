@@ -168,14 +168,13 @@ function islandora_bookviewer_get_mods($book_pid) {
   
 function islandora_bookviewer_ocr_search($book, $ocr_term) {
   global $base_url;
-
   $url = $base_url .":8080/solr/select/?q=ds_OCR_t:\"". $ocr_term ."\"&fq=rels_isPageOf_uri_ms:\"info:fedora/". $book ."\"&version=2.2&start=0&fl=PID,rels_isPageNumber_uri_ms&wt=json";
   $json = drupal_http_request($url);
   if (is_callable('json_decode')) {
     $result_obj = json_decode($json->data);
   }
   else {
-    //break shit
+    //break 
     watchdog('islandora_bookviewer', 'No json_decode, herp derp.', array(), WATCHDOG_ERROR);
     // send back something empty
     return;
