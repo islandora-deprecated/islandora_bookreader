@@ -129,7 +129,7 @@
 
       br.search = function(term) {
 
-        var url = "/ocrsearch/" + br.bookPid + "/" + escape(term)
+        var url = br.baseUrl + "/ocrsearch/" + br.bookPid + "/" + escape(term)
         term = term.replace(/\//g, ' '); // strip slashes, since this goes in the url
         this.searchTerm = term;
 

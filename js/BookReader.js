@@ -2555,7 +2555,7 @@ BookReader.prototype.prefetchImg = function(index) {
             //alert(alt, $(this).attr("src"));
             $(this).unbind("error").attr({
                 src: alt
-            });
+             });
         });
 
         img.src = pageURI;
@@ -3678,7 +3678,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
-        +     "<button class='BRicon logo'></buttion>"
+        +     "<button class='BRicon full_text'></buttion>"
         +     "<button class='BRicon full'></button>"
         +     "<button class='BRicon share'></button>"
         +     readIcon
@@ -3714,6 +3714,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
        $('#BRtoolbarbuttons .share').hide();
        $('#BRtoolbarbuttons .full').hide();// pp
        $('#BRtoolbarbuttons .logo').hide();// pp
+       $('#BRtoolbarbuttons .full_text').hide();// pp
     }
 
     $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
@@ -3757,7 +3758,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         self.buildInfoDiv($('#BRinfo'));
       }
     });
-    jToolbar.find('.logo').colorbox({inline: true, opacity: "0.5", href: "#BRocr",
+    jToolbar.find('.full_text').colorbox({inline: true, opacity: "0.5", href: "#BRocr",
       onLoad: function() {
         self.autoStop(); self.ttsStop();
         self.buildOcrDiv($('#BRocr'));
@@ -5391,7 +5392,8 @@ BookReader.prototype.initUIStrings = function()
                    '.BRdn': 'Show/hide nav bar', // Would have to keep updating on state change to have just "Hide nav bar"
                    '.BRup': 'Show/hide nav bar',
                    '.book_top': 'First page',
-                   '.book_bottom': 'Last page'
+                   '.book_bottom': 'Last page',
+                   '.full_text' : 'Full Text'
                   };
     if ('rl' == this.pageProgression) {
         titles['.book_leftmost'] = 'Last page';

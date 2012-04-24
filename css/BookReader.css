@@ -253,6 +253,7 @@ a {
 .BRicon.thumb:hover      { background-position: -1120px 0px; }
 .BRicon.fit              { background-position: -1160px 0px; }
 .BRicon.fit:hover        { background-position: -1200px 0px; }
+.BRicon.full_text             { background-position:     0px 0px; }
 
 
 a.logo {
