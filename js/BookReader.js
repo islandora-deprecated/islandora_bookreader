@@ -5352,7 +5352,7 @@ BookReader.prototype.buildInfoDiv = function(jInfoDiv)
 BookReader.prototype.buildOcrDiv = function(jOcrDiv)
 {
     //jOcrDiv.find('.BRfloatMeta').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle); 
-     jOcrDiv.height(600);//auto resize is a bit of an issue for this div pages with gibberish ocr maybe too big so 
+     jOcrDiv.height(700);//auto resize is a bit of an issue for this div pages with gibberish ocr maybe too big so 
                          //setting this to a size that should not overflow for normal text.
     $.get(this.getOcrURI(this.currentIndex()),
       function(data) {
