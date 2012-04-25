@@ -174,12 +174,13 @@ function islandora_bookviewer_get_mods($book_pid) {
  */
 function islandora_bookviewer_ocr_search($book, $ocr_term) {
   global $base_url;
+  $request_handler = variable_get("islandora_solr_search_block_request_handler", "standard");
   $ocr_term = htmlspecialchars(drupal_urlencode($ocr_term), ENT_QUOTES, 'utf-8', FALSE); //allow multiple words
   $solr_url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
   $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.sequenceNumber'); //not configurable yet, not exposed in the form.
   $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'ds_OCR_t'); //defaults to original specified in Jason's code
   $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels_isPageOf_uri_ms'); //defaults to original specified in Jason's code
-  $url = $solr_url . "/select/?q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=". variable_get('islandora_bookviewer_solr_result_count', 32) ."&fl=PID,$sequence_field&wt=json";
+  $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=". variable_get('islandora_bookviewer_solr_result_count', 32) ."&fl=PID,$sequence_field&wt=json";
   $url_array = parse_url($url);
   if (!isset($url_array['scheme'])) {
     $url = 'http://' . $url; //default to http if they need https they should set it in the islandora solr config form.
