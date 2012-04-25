@@ -27,12 +27,12 @@ class IslandoraBookviewer {
     //this will take some time but eventually would be worthwhile as the index php does not have access to drupal functions/variables when loaded as
     //an iframe
     $viewer_url = $base_url . '/' . $fullPath . "$page?pid=" . $this->pid . '&label=' . $this->item->objectProfile->objLabel .
-      '&showIcon=' . variable_get('islandora_bookviewer_show_ia_logo', '1') .
-      '&view=' . variable_get('islandora_bookviewer_default_view', '2');
+      '&showIcon=' . variable_get('islandora_bookviewer_show_ia_logo', '1');
     // if we have a search query then pass it to the viewer (to parse in book)
     if ($query != "") {
       $viewer_url = $viewer_url . '&solrq=' . $query;
     }
+    $viewer_url .= '#mode/' . variable_get('islandora_bookviewer_default_view', '2up');
     $html = '<iframe id="iabookviewer" name="iabookviewer" src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
@@ -71,7 +71,7 @@ class IslandoraBookviewer {
 
     $tabs['View'] = array(
       '#type' => 'tabpage',
-      '#title' => 'View',
+      '#title' => t('View'),
       '#content' => $viewer,
       '#weight' => -1
     );

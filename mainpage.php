@@ -176,9 +176,7 @@
         return "Embed code not supported in bookreader demo.";
       }
 
-      // Let's go!
-      br.init();
-
+      
       function getURLParam(name) {
         // get query string part of url into its own variable
         var url = window.location.href;
@@ -205,6 +203,8 @@
       if (query != "") {
         br.search(query);
       }
+      // Let's go!
+      br.init();
 
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();

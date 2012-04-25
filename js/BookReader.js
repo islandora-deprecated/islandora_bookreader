@@ -44,7 +44,7 @@ function BookReader() {
     this.reduce  = 4;
     this.padding = 10;          // Padding in 1up
 
-    urlmode = getURLParam('view');
+   /* urlmode = getURLParam('view');
     switch (urlmode) {
         case '1':
             this.mode = this.constMode1up;
@@ -58,7 +58,8 @@ function BookReader() {
         default:
             this.mode = this.constMode2up;
         break;
-    }
+    }*/
+    this.mode = this.constMode2up; // might not be needed
     this.ui = 'full';        // UI mode
     this.uiAutoHide = false; // Controls whether nav/toolbar will autohide
 
@@ -213,7 +214,7 @@ BookReader.prototype.init = function() {
 
     this.setupKeyListeners();
     this.startLocationPolling();
-
+    //var self = this;
     $(window).bind('resize', this, function(e) {
         //console.log('resize!');
 
@@ -995,7 +996,7 @@ BookReader.prototype.zoom = function(direction) {
 BookReader.prototype.zoom1up = function(direction) {
 
     if (this.constMode2up == this.mode) {     //can only zoom in 1-page mode
-        this.switchMode(1);
+        this.switchMode(this.constMode1up);
         return;
     }
 
@@ -3195,9 +3196,9 @@ BookReader.prototype.autoToggle = function() {
     this.ttsStop();
 
     var bComingFrom1up = false;
-    if (2 != this.mode) {
+    if (this.constMode2up != this.mode) {
         bComingFrom1up = true;
-        this.switchMode(2);
+        this.switchMode(this.constMode2up);
     }
 
     // Change to autofit if book is too large
@@ -3725,9 +3726,9 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 
     this.updateToolbarZoom(this.reduce); // Pretty format
 
-//    if (ui == "embed" || ui == "touch") {
-//        $("#BookReader a.logo").attr("target","_blank");
-//    }
+    if (ui == "embed" || ui == "touch") {
+        $("#BookReader a.logo").attr("target","_blank");
+    }
 
     // $$$ turn this into a member variable
     var jToolbar = $('#BRtoolbar'); // j prefix indicates jQuery object
