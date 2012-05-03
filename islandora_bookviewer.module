@@ -186,17 +186,25 @@ function islandora_bookviewer_get_page_data($pid) {
 function islandora_bookviewer_populate_boxes($pid, $page, $term) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $item = new Fedora_Item($pid);
-  $wordsxy = $item->get_datastream_dissemination('WORDSXY');
+  $wordsxy = $item->get_datastream_dissemination('ENCODED_OCR');
   if (!isset($wordsxy)) {
-    return NULL;
+    return array();
   }
   $xml = new SimpleXMLElement($wordsxy);
-  $matches = $xml->xpath('//charParams[. = "'.$term.'"]');
+  $namespaces = $xml->getDocNamespaces();
+  $count_ns = count($namespaces);
+  if (count($namespaces) > 0) { //tesseract does not add a namespace so check for one
+    $xml->registerXPathNamespace('ns', $namespaces['']);
+    $matches = $xml->xpath('//ns:span[.="' . $term . '"]/../@title');
+  } else {
+    $matches = $xml->xpath('//span[.="' . $term . '"]/../@title');
+  }
   $boxes = array();
-  $lower_term =strtolower($term);
-  foreach ($matches as $match){
-    $attr = $match->attributes();
-    $boxes[] = array('l'=>intval($attr->l)+10,'r'=>intval($attr->r)+15,'t'=>intval($attr->t)-5,'b'=>intval($attr->b)+15,'page'=>$page);
+  $lower_term = strtolower($term);
+  foreach ($matches as $match) {
+    $bbox = (string) $match['title'];
+    $values = explode(' ', $bbox);
+    $boxes[] = array('l' => intval($values[1]) + 5, 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
   }
   return $boxes;
 }
@@ -218,7 +226,8 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
   $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.sequenceNumber'); //not configurable yet, not exposed in the form.
   $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'ds_OCR_t'); //defaults to original specified in Jason's code
   $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels_isPageOf_uri_ms'); //defaults to original specified in Jason's code
-  $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=" . variable_get('islandora_bookviewer_solr_result_count', 32) . "&fl=PID,$sequence_field&wt=json";
+  $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=" . variable_get('islandora_bookviewer_solr_result_count', 32) .
+      "&fl=PID,$sequence_field&hl=true&hl.fl=$ocr_field&hl.snippets=200&hl.simple.pre={{{&hl.simple.post=}}}&hl.fragsize=200&wt=json";
   $url_array = parse_url($url);
   if (!isset($url_array['scheme'])) {
     $url = 'http://' . $url; //default to http if they need https they should set it in the islandora solr config form.
@@ -239,29 +248,23 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
     //TODO: index page width and height in solr so we have it in the results
     $page_data = islandora_bookviewer_get_page_data($doc->PID);
     $page = $doc->{"$sequence_field"}[0]; //hack to get a page in case the defined field has a . or other symbol
-    //$ocr_returned = $doc->{"$ocr_field"};
-    $boxes = islandora_bookviewer_populate_boxes($doc->PID, $page,$ocr_term);
+    $doc_pid = $doc->PID;
+    $highlighting = $result_obj->highlighting;
+    //check plain does not seem to fix some of the data example &gt; 
+    $ocr_returned = str_replace('&', ' ', check_plain((string) $highlighting->{"$doc_pid"}->{"$ocr_field"}[0]));
+    $boxes = islandora_bookviewer_populate_boxes($doc->PID, $page, $ocr_term);
     $output['matches'][] = array(
-      'text' => "", //$doc->PID,
+      'text' => $ocr_returned, //$doc->PID,
       'par' => array(
-        /*
-          "b": 1090, "t": 700, "r": 2024, "l": 192,
-          "boxes": [
-          { "r": 1560, "b": 957, "t": 899, "l": 1378 },
-          { "r": 1767, "b": 957, "t": 899, "l": 1587 } */
-
         array(
           'page' => intval($page),
           'page_width' => $page_data->width,
           'page_height' => $page_data->height,
-          'r' => '2024',
-          'b' => '1090',
-          't' => '700',
-          'l' => '192',
-          'boxes' => $boxes,//array(
-            //array("r" => '1560', "b" => '957', "t" => '899', "l" => '1378', 'page' => $page),
-            //array("r" => '1767', "b" => '957', "t" => '899', "l" => '1587', 'page' => $page),
-          //),
+          //'r' => '2024',
+          //'b' => '1090',
+          //'t' => '700',
+          //'l' => '192',
+          'boxes' => $boxes,
         ),
       )
     );
