@@ -1,6 +1,8 @@
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:template match="document">
+    <xsl:variable name="lcletters">abcdefghijklmnopqrstuvwxyz</xsl:variable>
+    <xsl:variable name="ucletters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</xsl:variable>
     <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <title></title>
@@ -33,11 +35,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                         <span class="ocr_line" id="line_{$lineId}" title="bbox {$lx0} {$ly0} {$lx1} {$ly1}">
                             <!--<xsl:value-of select="." />-->
                             <xsl:for-each select="charParams">
+                                <xsl:variable name="wordId"><xsl:number from="/" level="any" count="charParams" /></xsl:variable>
                                 <xsl:variable name="wx0"><xsl:value-of select="@l" /></xsl:variable>                
                                 <xsl:variable name="wy0"><xsl:value-of select="@t" /></xsl:variable>
                                 <xsl:variable name="wx1"><xsl:value-of select="@r" /></xsl:variable>                
                                 <xsl:variable name="wy1"><xsl:value-of select="@b" /></xsl:variable>
-                                <span class="ocr_word" id="lineId_ + position()" title="{$wx0} {$wy0} {$wx1} {$wy1}"></span>
+                                <span class="ocr_word" id="word_{$wordId}" title="bbox {$wx0} {$wy0} {$wx1} {$wy1}"><span class='ocrx_word' id='xword_{$wordId}' title="x_wconf 0"><xsl:value-of select="translate(.,$ucletters,$lcletters)"></xsl:value-of></span></span><xsl:text> </xsl:text>
                             </xsl:for-each>
                             <!--<xsl:variable name="xBoxes">
                                 <xsl:value-of separator=" " select="(*[@l]|*[@t]|*[@r]|*[@b])[text()]" />
@@ -52,7 +55,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                             <xsl:variable name="wy0"><xsl:value-of select="@t" /></xsl:variable>
                             <xsl:variable name="wx1"><xsl:value-of select="@r" /></xsl:variable>                
                             <xsl:variable name="wy1"><xsl:value-of select="@b" /></xsl:variable>
-                            <span class="ocr_word" id="word_{$wordId}" title="bbox {$wx0} {$wy0} {$wx1} {$wy1}"><span class='ocrx_word' id='xword_{$wordId}' title="x_wconf 0"><xsl:value-of select="."></xsl:value-of></span></span><xsl:text> </xsl:text>
+                            <span class="ocr_word" id="word_{$wordId}" title="bbox {$wx0} {$wy0} {$wx1} {$wy1}"><span class='ocrx_word' id='xword_{$wordId}' title="x_wconf 0"><xsl:value-of select="translate(.,$ucletters,$lcletters)"></xsl:value-of></span></span><xsl:text> </xsl:text>
                         </xsl:for-each>
                     </p>
                 </xsl:for-each>

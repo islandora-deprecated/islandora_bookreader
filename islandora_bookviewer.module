@@ -190,21 +190,30 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
   if (!isset($wordsxy)) {
     return array();
   }
-  $xml = new SimpleXMLElement($wordsxy);
+  try {
+    $xml = new SimpleXMLElement($wordsxy);
+  } catch (Exception $e) {
+    return array();
+  }
   $namespaces = $xml->getDocNamespaces();
   $count_ns = count($namespaces);
-  if (count($namespaces) > 0) { //tesseract does not add a namespace so check for one
-    $xml->registerXPathNamespace('ns', $namespaces['']);
-    $matches = $xml->xpath('//ns:span[.="' . $term . '"]/../@title');
-  } else {
-    $matches = $xml->xpath('//span[.="' . $term . '"]/../@title');
-  }
-  $boxes = array();
   $lower_term = strtolower($term);
-  foreach ($matches as $match) {
-    $bbox = (string) $match['title'];
-    $values = explode(' ', $bbox);
-    $boxes[] = array('l' => intval($values[1]) + 5, 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
+  $lower_term = urldecode($lower_term);
+  $terms = explode(' ', $lower_term);
+  $boxes = array();
+  foreach ($terms as $t) {
+    if (count($namespaces) > 0) { //tesseract does not add a namespace so check for one
+      $xml->registerXPathNamespace('ns', $namespaces['']);
+      $matches = $xml->xpath('//ns:span[.="' . $t . '"]/../@title');
+    }
+    else {
+      $matches = $xml->xpath('//span[.="' . $t . '"]/../@title');
+    }
+    foreach ($matches as $match) {
+      $bbox = (string) $match['title'];
+      $values = explode(' ', $bbox);
+      $boxes[] = array('l' => intval($values[1]) + 5, 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
+    }
   }
   return $boxes;
 }
