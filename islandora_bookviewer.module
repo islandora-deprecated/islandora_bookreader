@@ -212,7 +212,7 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
     foreach ($matches as $match) {
       $bbox = (string) $match['title'];
       $values = explode(' ', $bbox);
-      $boxes[] = array('l' => intval($values[1]) + 5, 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
+      $boxes[] = array('l' => intval($values[1]), 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
     }
   }
   return $boxes;
@@ -344,9 +344,15 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
   );
   $form['book_ahah_wrapper']['islandora_bookviewer_sequence_number'] = array(
     '#type' => 'textfield',
-    '#title' => t('A field that hold the page sequence numbers'),
+    '#title' => t('A field that holds the page sequence numbers'),
     '#description' => t('This field should contain the page or sequence number of each page/image.'),
     '#default_value' => variable_get('islandora_bookviewer_sequence_number', 'rels.sequenceNumber'),
+  );
+  $form['book_ahah_wrapper']['islandora_bookviewer_compression'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The djatoka image compression level'),
+    '#description' => t('The level of compression we want djatoka to use when creating the image, usually set at 4 or 5.'),
+    '#default_value' => variable_get('islandora_bookviewer_compression', '4'),
   );
   $form['book_ahah_wrapper']['islandora_bookviewer_solr_result_count'] = array(
     '#type' => 'textfield',
@@ -385,7 +391,7 @@ function islandora_bookviewer_setup($pid) {
   $configs['DJATOKA_PREFIX'] = $djatoka_prefix;
   $configs['ISLANDORA_PREFIX'] = $islandora_prefix;
   $configs['FEDORA_PREFIX'] = $fedora_prefix;
-  $configs['COMPRESSION'] = 4;
+  $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression','4');
   $configs['book_pids'] = $book_pids;
   $configs['page_width'] = $pageData->width;
   $configs['page_height'] = $pageData->height;
