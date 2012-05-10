@@ -43,13 +43,13 @@
       br.baseUrl = islandora_params.base_url;
       br.module_path = islandora_params.module_path;
       br.getPageWidth = function(index) {
-        return br.width;
+        return br.width;      
       }
 
       // Return the height of a given page.
       br.getPageHeight = function(index) {
         return br.height;
-      }
+      }  
 
       // We load the images from fedora
       // using a different URL structure
