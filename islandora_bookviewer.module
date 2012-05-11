@@ -210,10 +210,10 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
   foreach ($terms as $t) {
     if (count($namespaces) > 0) { //tesseract does not add a namespace so check for one
       $xml->registerXPathNamespace('ns', $namespaces['']);
-      $matches = $xml->xpath('//ns:span[.="' . $t . '"]/../@title');
+      $matches = $xml->xpath('//ns:span[.="' . $t . '"]');
     }
     else {
-      $matches = $xml->xpath('//span[.="' . $t . '"]/../@title');
+      $matches = $xml->xpath('//span[.="' . $t . '"]');
     }
     foreach ($matches as $match) {
       $bbox = (string) $match['title'];
@@ -266,7 +266,7 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
     $doc_pid = $doc->PID;
     $highlighting = $result_obj->highlighting;
     //check plain does not seem to fix some of the data example &gt; 
-    $ocr_returned = str_replace('&', ' ', check_plain((string) $highlighting->{"$doc_pid"}->{"$ocr_field"}[0]));
+    $ocr_returned = preg_replace('/[^a-zA-Z0-9-\n {}]/', '', $highlighting->{"$doc_pid"}->{"$ocr_field"}[0]);
     $boxes = islandora_bookviewer_populate_boxes($doc->PID, $page, $ocr_term);
     $output['matches'][] = array(
       'text' => $ocr_returned, //$doc->PID,
@@ -286,7 +286,7 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
   }
 
   drupal_json($output);
-  return;
+  exit();
 }
 
 function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &$form_state) {
