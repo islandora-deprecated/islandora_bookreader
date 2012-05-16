@@ -14,7 +14,7 @@ class IslandoraBookviewer {
   }
 
   // an ajax callback has been added in the module
-  function showAjaxBookViewer($page = 'mainpage.php') {
+  function showAjaxBookViewer($page = 'mainpage.php', $start_page='1') {
     global $base_url;
     $path = drupal_get_path('module', 'islandora_bookviewer');
     $fullPath = $path . '/';
@@ -32,7 +32,7 @@ class IslandoraBookviewer {
     if ($query != "") {
       $viewer_url = $viewer_url . '&solrq=' . $query;
     }
-    $viewer_url .= '#mode/' . variable_get('islandora_bookviewer_default_view', '2up');
+    $viewer_url .= '#page/' . $start_page . '/mode/' . variable_get('islandora_bookviewer_default_view', '2up');
     $html = '<iframe id="iabookviewer" name="iabookviewer" src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     return $html;
   }
