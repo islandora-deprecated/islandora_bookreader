@@ -72,7 +72,7 @@ function islandora_bookviewer_menu() {
   $items['bookreader/pagedata/%'] = array(
     'page callback' => 'islandora_bookviewer_get_page_data',
     'type' => MENU_CALLBACK,
-    'access arguments' => array ('view fedora collection'),
+    'access arguments' => array('view fedora collection'),
     'page arguments' => array(2),
   );
   /*
@@ -196,11 +196,11 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
   if (!isset($wordsxy)) {
     return array();
   }
-  try {
-    $xml = new SimpleXMLElement($wordsxy);
-  } catch (Exception $e) {
+  $xml = @simplexml_load_string($wordsxy);
+  if (!$xml) {
     return array();
   }
+
   $namespaces = $xml->getDocNamespaces();
   $count_ns = count($namespaces);
   $lower_term = strtolower($term);
@@ -397,7 +397,7 @@ function islandora_bookviewer_setup($pid) {
   $configs['DJATOKA_PREFIX'] = $djatoka_prefix;
   $configs['ISLANDORA_PREFIX'] = $islandora_prefix;
   $configs['FEDORA_PREFIX'] = $fedora_prefix;
-  $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression','4');
+  $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression', '4');
   $configs['book_pids'] = $book_pids;
   $configs['page_width'] = $pageData->width;
   $configs['page_height'] = $pageData->height;
