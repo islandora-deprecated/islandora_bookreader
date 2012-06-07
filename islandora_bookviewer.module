@@ -238,9 +238,9 @@ function islandora_bookviewer_ocr_search($book, $ocr_term) {
   $request_handler = variable_get("islandora_solr_search_block_request_handler", "standard");
   $ocr_term = htmlspecialchars(drupal_urlencode($ocr_term), ENT_QUOTES, 'utf-8', FALSE); //allow multiple words
   $solr_url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
-  $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.sequenceNumber'); //not configurable yet, not exposed in the form.
-  $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'ds_OCR_t'); //defaults to original specified in Jason's code
-  $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels_isPageOf_uri_ms'); //defaults to original specified in Jason's code
+  $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.isSequenceNumber'); //not configurable yet, not exposed in the form.
+  $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'OCR.OCR'); 
+  $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels.isMemberOf'); //defaults to original specified in Jason's code
   $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=" . variable_get('islandora_bookviewer_solr_result_count', 32) .
       "&fl=PID,$sequence_field&hl=true&hl.fl=$ocr_field&hl.snippets=200&hl.simple.pre={{{&hl.simple.post=}}}&hl.fragsize=200&wt=json";
   $url_array = parse_url($url);
@@ -340,19 +340,19 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#type' => 'textfield',
     '#title' => t('solr full text field name'),
     '#description' => t('When we search within a book we need to know which field to search.'),
-    '#default_value' => variable_get('islandora_bookviewer_ocr_field', 'ds_OCR_t'),
+    '#default_value' => variable_get('islandora_bookviewer_ocr_field', 'OCR.OCR'),
   );
   $form['book_ahah_wrapper']['islandora_bookviewer_ocr_filter_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr field that has the relationship to the book object pid'),
     '#description' => t('When we search within a book we need to know the pid of the book.  This would be the solr field that contains the book pid for each page object.'),
-    '#default_value' => variable_get('islandora_bookviewer_ocr_filter_field', 'rels_isPageOf_uri_ms'),
+    '#default_value' => variable_get('islandora_bookviewer_ocr_filter_field', 'rels.isMemberOf'),
   );
   $form['book_ahah_wrapper']['islandora_bookviewer_sequence_number'] = array(
     '#type' => 'textfield',
     '#title' => t('A field that holds the page sequence numbers'),
     '#description' => t('This field should contain the page or sequence number of each page/image.'),
-    '#default_value' => variable_get('islandora_bookviewer_sequence_number', 'rels.sequenceNumber'),
+    '#default_value' => variable_get('islandora_bookviewer_sequence_number', 'rels.isSequenceNumber'),
   );
   $form['book_ahah_wrapper']['islandora_bookviewer_compression'] = array(
     '#type' => 'textfield',
@@ -363,7 +363,7 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
   $form['book_ahah_wrapper']['islandora_bookviewer_solr_result_count'] = array(
     '#type' => 'textfield',
     '#title' => t('The maximum number of results to return in a solr query'),
-    '#description' => t('The maximum number of pages that will be returned by a full text search.  Too small an important results might be skipped, too large and the viewer timeline will be flooded.'),
+    '#description' => t('The maximum number of pages that will be returned by a full text search.  Too small and important results might be skipped, too large and the viewer timeline will be flooded.'),
     '#default_value' => variable_get('islandora_bookviewer_solr_result_count', '32'),
   );
 }
