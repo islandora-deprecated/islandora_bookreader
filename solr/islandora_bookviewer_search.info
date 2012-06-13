@@ -1,0 +1,7 @@
+name = Islandora Bookviewer customizations
+description = Module for custom search results for the bookviewer adds page number and query string to urls generated on the search results page
+dependencies[] = islandora_solr_search
+description = Customizes Islandora solr search
+package = Islandora Search
+version = 11.3.1
+core = 6.x
