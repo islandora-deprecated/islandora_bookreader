@@ -61,7 +61,7 @@ class BookviewerSolrResults extends IslandoraSolrResults {
     }
     $q = $responseArray['responseHeader']['params']['q'];
      //we need to get rid of fields and delimiters, the book assumes full text search only
-    $terms = preg_split('/"| or | OR | and | AND |[a-z._A-Z]*:|#(?<!\\\)\:#/',$q); 
+    $terms = preg_split('/"|\)|\(| or | OR | and | AND |[a-z._A-Z]*:|#(?<!\\\)\:#/',$q); 
     //q_string should now be only the words searched for in the solr block minus the fields and modifiers
     $q_string = trim(implode(" ",$terms));
     foreach ($results->response->docs as $doc) {
