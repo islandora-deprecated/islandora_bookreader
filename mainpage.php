@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/BookReader.css"/>
     <!-- Custom CSS overrides -->
     <link rel="stylesheet" type="text/css" href="css/BookReaderDemo.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mods2html.css"/>
 
     <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
@@ -36,17 +37,19 @@
       br.fedora_prefix = islandora_params.FEDORA_PREFIX;
       br.width = parseInt(islandora_params.page_width);
       br.height = parseInt(islandora_params.page_height);
+      br.pageProgression = islandora_params.page_progression;
       br.structMap = islandora_params.book_pids;
       br.compression = islandora_params.COMPRESSION;
-
+      br.baseUrl = islandora_params.base_url;
+      br.module_path = islandora_params.module_path;
       br.getPageWidth = function(index) {
-        return br.width;
+        return br.width;      
       }
 
-      // Return the height of a given page.  Here we assume all images are 1200 pixels high
+      // Return the height of a given page.
       br.getPageHeight = function(index) {
         return br.height;
-      }
+      }  
 
       // We load the images from fedora
       // using a different URL structure
@@ -57,13 +60,29 @@
         var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
        // var url = br.djatoka_prefix + br.islandora_prefix + leafStr + '/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
        var url = br.djatoka_prefix + br.fedora_prefix + '/objects/' + leafStr + '/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
-
+        
         return url;
+      }
+      
+      br.getOcrURI = function (index){
+        var indices = br.getSpreadIndices(index);
+        var pidL = br.structMap[indices[0]+1]; // pid for left page
+        var pidR = br.structMap[indices[1]+1]; // pid for right page
+        if (typeof pidL == 'undefined') { pidL = '-'; }
+        if (typeof pidR == 'undefined') { pidR = '-'; }
+        return br.baseUrl+"/bookreader/ocr/" + pidL + '/' + pidR ;
       }
 
       br.getModsURI = function(index) {
-        var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
-        return br.islandora_prefix + leafStr + "/MODS";
+        //var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
+        //return br.islandora_prefix + leafStr + "/MODS";
+        //return "/mods2html/" + leafStr;
+        var indices = br.getSpreadIndices(index);
+        var pidL = br.structMap[indices[0]+1]; // pid for left page
+        var pidR = br.structMap[indices[1]+1]; // pid for right page
+        if (typeof pidL == 'undefined') { pidL = '-'; }
+        if (typeof pidR == 'undefined') { pidR = '-'; }
+        return br.baseUrl+"/mods2html/" + br.bookPid ;
       }
 
       br.getPid = function (index) {
@@ -73,8 +92,9 @@
 
       // Return which side, left or right, that a given page should be displayed on
       br.getPageSide = function(index) {
-        $vals = ["R", "L"];
-        return $vals[index & 0x1];
+        //$vals = ["R", "L"];
+        //return $vals[index & 0x1];
+        return br.pageProgression.toUpperCase()[1-(index & 0x1)]
       }
 
       // This function returns the left and right indices for the user-visible
@@ -107,6 +127,24 @@
         return spreadIndices;
       }
 
+      br.search = function(term) {
+
+        var url = br.baseUrl + "/ocrsearch/" + br.bookPid + "/" + encodeURI(term)
+        term = term.replace(/\//g, ' '); // strip slashes, since this goes in the url
+        this.searchTerm = term;
+
+        this.removeSearchResults();
+        this.showProgressPopup('<img id="searchmarker" src="'+this.imagesBaseURL + 'marker_srch-on.png'+'"> Search results will appear below...');
+        $.ajax({url:url, dataType:'json',
+          success: function(data, status, xhr) {
+            br.BRSearchCallback(data);
+          },
+          error: function() {
+            alert("Search call to " + url + " failed");
+          }
+        });
+      }
+
       // For a given "accessible page index" return the page number in the book.
       //
       // For example, index 5 might correspond to "Page 1" if there is front matter such
@@ -114,6 +152,10 @@
       // for now we just show the image number
       br.getPageNum = function(index) {
         return index+1;
+      }
+
+      br.leafNumToIndex = function(index) {
+        return index-1;
       }
 
       // Total number of leafs
@@ -128,23 +170,48 @@
       br.bookUrl = br.islandora_prefix + PID;
       br.bookPid = PID;
       // Override the path used to find UI images
-      br.imagesBaseURL = '../images/';
-
+      br.imagesBaseURL = 'images/';
+      br.logoURL = ""; //don't want to go to LOC so init it empty, the title already takes us back to the book
       br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
         return "Embed code not supported in bookreader demo.";
       }
 
+      
+      function getURLParam(name) {
+        // get query string part of url into its own variable
+        var url = window.location.href;
+        var query_string = url.split("?");
+
+        // make array of all name/value pairs in query string
+        var params = query_string[1].split(/\&|#/);
+
+        // loop through the parameters
+        var i = 0;
+        while (params.length > i) {
+          // compare param name against arg passed in
+          var param_item = params[i].split("=");
+          if (param_item[0] == name) {
+              // if they match, return the value
+              return param_item[1];
+          }
+          i++;
+        }
+        return "";
+      }
+
+      var query = getURLParam("solrq");
+      if (query != "") {
+        br.search(query);
+      }
       // Let's go!
       br.init();
 
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();
-      $('#textSrch').hide();
-      $('#btnSrch').hide();
+      //$('#textSrch').hide();
+      //$('#btnSrch').hide();
 
     </script>
 
-
   </body>
 </html>
-

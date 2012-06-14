@@ -1,7 +1,7 @@
-; $Id$
 name = islandora_bookviewer
 dependencies[] = fedora_repository
 dependencies[] = tabs
+dependencies[] = islandora_solr_search
 description = Islandora Bookviewer based on the archive.org bookviewer.
 package = Islandora
 version = 6.x-12.1-RC2
