@@ -1,4 +1,3 @@
-; $Id$
 name = islandora_bookviewer
 dependencies[] = fedora_repository
 dependencies[] = tabs
