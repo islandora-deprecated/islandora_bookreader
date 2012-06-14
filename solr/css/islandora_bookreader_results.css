@@ -1,0 +1,11 @@
+/* 
+    Document   : upei_vre_leg.css
+    Created on : May 16, 2012, 11:20:01 AM
+    Author     : ppound
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+.upei_vre_leg_align-right { float:right; margin: 0 0 15px 15px; }
+.upei_vre_leg_align-left { float:left; margin: 0 15px 15px 0; }
+.upei_vre_leg_frame { padding: 5px; border: 1px solid #aaa; }

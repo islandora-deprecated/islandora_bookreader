@@ -30,7 +30,7 @@ class BookviewerSolrResults extends IslandoraSolrResults {
    * This output has been customized for Legislative assembly books
    */
   function printResults($results) {
-    drupal_add_css(drupal_get_path('module', 'upei_vre_leg') .'/css/upei_vre_leg.css');
+    drupal_add_css(drupal_get_path('module', 'islandora_bookviewer') .'/solr/css/islandora_bookreader_results.css');
     global $base_url;
     $items = array();
     $type = "ol";
