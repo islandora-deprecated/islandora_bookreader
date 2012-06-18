@@ -203,9 +203,61 @@
       if (query != "") {
         br.search(query);
       }
+      
+      br.initUIStrings = function() {
+    // Navigation handlers will be bound after all UI is in place -- makes moving icons between
+    // the toolbar and nav bar easier
+
+    // Setup tooltips -- later we could load these from a file for i18n
+        var titles = { '.logo': 'Go to Archive.org', // $$$ update after getting OL record
+                   '.zoom_in': 'Zoom in',
+                   '.zoom_out': 'Zoom out',
+                   '.onepg': 'One-page view',
+                   '.twopg': 'Two-page view',
+                   '.thumb': 'Thumbnail view',
+                   '.print': 'Print this page',
+                   '.embed': 'Embed BookReader',
+                   '.link': 'Link to this book (and page)',
+                   '.bookmark': 'Bookmark this page',
+                   '.read': 'Read this book aloud',
+                   '.share': 'Share this book',
+                   '.info': 'Page Text',
+                   '.full': 'Show fullscreen',
+                   //'.book_left': 'Previous Page',
+                   //'.book_right': 'Next Page',
+                   '.book_up': 'Page up',
+                   '.book_down': 'Page down',
+                   '.play': 'Play',
+                   '.pause': 'Pause',
+                   '.BRdn': 'Show/hide nav bar', // Would have to keep updating on state change to have just "Hide nav bar"
+                   '.BRup': 'Show/hide nav bar',
+                   '.book_top': 'First page',
+                   '.book_bottom': 'Last page',
+                   '.full_text' : 'Full Text'
+                  };
+        if ('rl' == this.pageProgression) {
+            titles['.book_leftmost'] = 'Last page';
+            titles['.book_rightmost'] = 'First page';
+            titles['.book_left'] = 'Next Page';
+            titles['.book_right'] = 'Previous Page';
+        } else { // LTR
+            titles['.book_leftmost'] = 'First page';
+            titles['.book_rightmost'] = 'Last page';
+            titles['.book_left'] = 'Previous Page';
+            titles['.book_right'] = 'Next Page';
+        }
+
+        for (var icon in titles) {
+           if (titles.hasOwnProperty(icon)) {
+               $('#BookReader').find(icon).attr('title', titles[icon]);
+            }
+        }
+    }
+      
+     
       // Let's go!
       br.init();
-
+      
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();
       //$('#textSrch').hide();
