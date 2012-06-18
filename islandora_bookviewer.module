@@ -176,7 +176,7 @@ function islandora_bookviewer_get_mods($book_pid) {
  */
 function islandora_bookviewer_get_page_data($pid) {
   $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
-  $fedora_prefix = variable_get('fedora_base_url', 'http:8080/fedora');
+  $fedora_prefix = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
   $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $pid . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
   $pageData = json_decode(file_get_contents($filename));
   return $pageData;
@@ -388,7 +388,7 @@ function islandora_bookviewer_setup($pid) {
   $label = $item->objectProfile->objLabel;
   $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
   $islandora_prefix = $base_url . '/fedora/repository/';
-  $fedora_prefix = variable_get('fedora_base_url', 'http:8080/fedora');
+  $fedora_prefix = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
   $book_pids = get_page_pids($pid);
   $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $book_pids[1] . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
   $pageData = json_decode(file_get_contents($filename));
