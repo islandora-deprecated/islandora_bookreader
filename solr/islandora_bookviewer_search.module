@@ -1,10 +1,8 @@
 <?php
 
-
-
-
 /**
  * @file
+ *
  * Configuration module for islandora_solr_search.module
  */
 
@@ -12,7 +10,7 @@
  * Implements hook_islandora_solr_primary_display()
  */
 function islandora_bookviewer_search_islandora_solr_primary_display() {
-  return array(   
+  return array(
     'islandora_bookviewer' => array(
       'name' => t('Bookviewer Results'),
       'module' => 'islandora_bookviewer_search',
@@ -28,7 +26,6 @@ function islandora_bookviewer_search_islandora_solr_primary_display() {
  * Implementation of hook_help()
  */
 function islandora_bookviewer_search_help($path, $arg) {
-
   switch ($path) {
     case 'admin/help#islandora_solr_config':
       return t("When 'Sample Solr Configuration Settings' is selected from the configuration drop-down in the<br />
@@ -43,4 +40,3 @@ function islandora_bookviewer_search_help($path, $arg) {
       );
   }
 }
-
