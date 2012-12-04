@@ -1,28 +1,76 @@
 <?php
 
-// $Id$
-
-/*
- * Created on Aug 10, 2007
+/**
+ * @file
+ *
+ * Defines all the hooks this module implements.
  */
 
 /**
- * Drupal hook for admin form
- * fedora_repository_name is the name of the top level collection this module will query
- * fedora_repository_pid is the name of the top level pid.
- * Stores this info in the drupal variables table.
- * the name and pid can also be passed as url parameters
+ * Implements hook_menu().
+ *
+ * @todo Review.
  */
-function islandora_bookviewer_admin() {
-  return "";
-}
-
-function islandora_bookviewer_admin_settings_submit($form, $form_values) {
-  
+function islandora_bookviewer_menu() {
+  return array(
+    'mods2html/%islandora_object' => array(
+      'page callback' => 'islandora_bookreader_get_mods',
+      'page arguments' => array(1),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(FEDORA_VIEW, 1),
+      'type' => MENU_CALLBACK,
+    ),
+    'bookreader/ocr/%islandora_object/%islandora_object' => array(
+      'page callback' => 'islandora_bookreader_get_ocr',
+      'page arguments' => array(2, 3),
+      'access callback' => 'islandora_bookreader_ocr_access_callback',
+      'access arguments' => array(FEDORA_VIEW, 2, 3),
+      'type' => MENU_CALLBACK,
+    ),
+    'bookreader/setup/%islandora_object' => array(
+      'page callback' => 'islandora_bookreader_setup',
+      'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(FEDORA_VIEW, 2),
+      'type' => MENU_CALLBACK,
+    ),
+    'ocrsearch/%/%' => array(
+      'page callback' => 'islandora_bookviewer_ocr_search',
+      'page arguments' => array(1, 2),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+    'bookreader/pagedata/%' => array(
+      'page callback' => 'islandora_bookviewer_get_page_data',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array('view fedora collection'),
+      'page arguments' => array(2),
+    )
+  );
 }
 
 /**
- * drupal hook to show help
+ * Implements hook_theme().
+ */
+function islandora_bookviewer_theme() {
+  return array(
+    'islandora_bookreader_mods' => array(
+      'file' => 'theme/islandora_bookreader.theme.inc',
+      'template' => 'theme/islandora-bookreader-mods',
+      'variables' => array('object' => NULL),
+    ),
+    'islandora_bookreader_ocr' => array(
+      'file' => 'theme/islandora_bookreader.theme.inc',
+      'template' => 'theme/islandora-bookreader-ocr',
+      'variables' => array('object' => NULL),
+    )
+  );
+}
+
+/**
+ * Implements hook_help().
+ *
+ * @todo Review
  */
 function islandora_bookviewer_help($path, $arg) {
   switch ($path) {
@@ -33,153 +81,104 @@ function islandora_bookviewer_help($path, $arg) {
   }
 }
 
-function islandora_bookviewer_menu() {
-  /*
-    $items['getbookpage/%'] = array(
-    'page callback' => 'islandora_bookviewer_get_book_page',
-    'page arguments' => array(1),
-    'access callback' => TRUE,
-    //'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-    );
-   */
-  $items['mods2html/%'] = array(
-    'page callback' => 'islandora_bookviewer_get_mods',
-    'page arguments' => array(1),
-    'access callback' => TRUE,
-    //'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['bookreader/ocr/%/%'] = array(
-    'page callback' => 'islandora_bookviewer_get_ocr',
-    'page arguments' => array(2, 3),
-    'access callback' => TRUE,
-    //'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['bookreader/setup'] = array(
-    'page callback' => 'islandora_bookviewer_setup',
-    'type' => MENU_CALLBACK,
-    'access arguments' => array('view fedora collection'),
-  );
-  $items['ocrsearch/%/%'] = array(
-    'page callback' => 'islandora_bookviewer_ocr_search',
-    'page arguments' => array(1, 2),
-    'access callback' => TRUE,
-    //'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['bookreader/pagedata/%'] = array(
-    'page callback' => 'islandora_bookviewer_get_page_data',
-    'type' => MENU_CALLBACK,
-    'access arguments' => array('view fedora collection'),
-    'page arguments' => array(2),
-  );
-  /*
-    //experimental - do not expose
-    $items['bookreader/standalone'] = array(
-    'page callback' => 'bookreader',
-    'file' => 'standalone.inc',
-    'type' => MENU_CALLBACK,
-    // 'access arguments' => array('view fedora collection'),
-    'access_callback'=>TRUE
-    );
-   */
-  return $items;
-}
-
-function islandora_bookviewer_perm() {
-  return array('use bookreader');
-}
-
-/*
-  function islandora_bookviewer_get_book_page($page) {
-  global $base_url;
-
-  // the preferred page
-  $page_path = $base_url .":8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=". $base_url ."/drupal/fedora/repository/". $page ."/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=4&svc.rotate=0";
-  // the fallback if the preferred one fails
-  $page_path = $base_url ."/drupal/fedora/repository/". $page ."/JP2";
-
-  return $page_path;
-  }
+/**
+ * Checks whether the user can access the given objects with the given
+ * permission.
+ *
+ * Checks for object existance, accessiblitly, namespace permissions,
+ * and user permissions
+ *
+ * @param string $perm
+ *   The user permission to test for.
+ * @param FedoraObject $left_object
+ *   The object to test, if NULL given the object doesn't exist or is
+ *   inaccessible.
+ * @param FedoraObject $right_object
+ *   The object to test, if NULL given the object doesn't exist or is
+ *   inaccessible.
+ *
+ * @return boolean
+ *   TRUE if the user is allowed to access this object, FALSE otherwise.
  */
-
-/*
-  This function will have to be generalized to an arbitrary number of arguments for fjm
-  see the drupal page http://drupal.org/node/626918 for details.
-
-  The emphasis is:
-  1) The wildcards in the drupal menu hook don't really matter - set it to something (maybe the mimimum required)
-  2) the callback should scan the arguments manually
-
-  function islandora_bookviewer_get_mods() {
-  $nargs=func_num_args();
-  for ($i = 0;$i < $nargs;$i++) {
-  print '/'.func_get_arg($i);
-  }
-  ...
-  }
- */
-
-function islandora_bookviewer_get_ocr($pidL = NULL, $pidR = NULL) {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $ocrL = "";
-  $ocrR = "";
-  if (isset($pidL)) {
-    $item = new Fedora_Item($pidL);
-    $ocrL = $item->get_datastream_dissemination('OCR');
-    $ocrL = htmlspecialchars($ocrL);
-  }
-  if (isset($pidR)) {
-    $item = new Fedora_Item($pidR);
-    $ocrR = $item->get_datastream_dissemination('OCR');
-    $ocrR = htmlspecialchars($ocrR);
-  }
-  print '<div class="ocrTop"><div class="ocrLeft">' . $ocrL . '</div><div class="ocrRight">' . $ocrR . '</div></div>';
-  return;
+function islandora_bookreader_ocr_access_callback($perm, $left_object, $right_object) {
+  return islandora_object_access_callback($perm, $left_object) && islandora_object_access_callback($perm, $right_object);
 }
 
 /**
- * get the mods record of the book not the page as the solution pack does not include mods at the page level
+ * Callback used by the viewer for displaying the given object's MODS
+ * data-stream.
+ *
+ * @param FedoraObject $object
+ *   The object whose MODS data-stream will be used for display.
+ */
+function islandora_bookreader_get_mods(FedoraObject $object) {
+  print theme('islandora_bookreader_mods', array('object' => $object));
+}
+
+/**
+ * Callback used by the viewer for displaying the given object's OCR
+ * data-streams.
+ *
+ * @param FedoraObject $left_object
+ *   The object whose OCR data-stream will be used for display on the left.
+ * @param FedoraObject $right_object
+ *   The object whose OCR data-stream will be used for display on the right.
+ */
+function islandora_bookreader_get_ocr(FedoraObject $left_object, FedoraObject $right_object) {
+  print theme('islandora_bookreader_ocr', array('left_object' => $left_object, 'right_object' => $right_object));
+}
+
+/**
+ * Provides page information for Bookviewer
+ * To be invoked with ajax
+ *
  * @global url $base_url
- * @param string $book_pid
- * @return type 
+ * @param string $pid
  */
-function islandora_bookviewer_get_mods($book_pid) {
+function islandora_bookreader_setup(FedoraObject $object) {
   global $base_url;
+  // @todo $base_url can be accessed client side via Drupal object.
+  // @todo I dislike circular dependancies, needed for get_page_pids().
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $book_pids = get_page_pids($object->id);
+  $page_data = islandora_bookviewer_get_page_data($book_pids[1]);
 
-  $proc = new XSLTProcessor();
-  $stylesheet = new DOMDocument();
-  $stylesheet->load($base_url . '/' . drupal_get_path('module', 'islandora_bookviewer') . "/mods2html.xsl");
-  $proc->importStyleSheet($stylesheet);
-  $html = "";
-  if (isset($book_pid)) {
-    $xmlL = new DOMDocument;
-    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-    $item = new Fedora_Item($book_pid);
-    $mods = $item->get_datastream_dissemination('MODS'); //need to get this using Fedora Item in case repo does not allow anonymous access
-    if (@$xmlL->loadXML($mods)) {
-      // an error - probably can't find/access the file
-      $html = $proc->transformToXML($xmlL);
-    }
-  }
-
-  print '<div id="modsTop"><div id="modsLeft">' . $html . '</div></div>';
-  return;
+  // @todo Have page data come from its seperate function.
+  $configs = array();
+  $configs['DJATOKA_PREFIX'] = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
+  $configs['ISLANDORA_PREFIX'] = $base_url . '/islandora/object/';
+  $configs['FEDORA_PREFIX'] = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
+  $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression', '4');
+  $configs['book_pids'] = $book_pids;
+  $configs['page_width'] = $page_data->width;
+  $configs['page_height'] = $page_data->height;
+  $configs['page_count'] = count($book_pids);
+  $configs['page_progression'] = get_page_progression($object->id);
+  $configs['label'] =  $object->label;
+  $configs['base_url'] = $base_url;
+  $configs['module_path'] = drupal_get_path('module', 'islandora_bookviewer');
+  $json = json_encode($configs);
+  echo $json;
 }
 
 /**
- * TODO: index page width and height in solr so we don't need to call this for every result
- * @param string $pid
- * @return object 
+ * Gets the page data.
+ *
+ * @todo Index page width and height in solr so we don't need to call this for
+ * every result
+ *
+ * @param string $object_id
+ *   The identifier for the object whose page data will be fetched.
+ *
+ * @return
  */
-function islandora_bookviewer_get_page_data($pid) {
+function islandora_bookviewer_get_page_data($object_id) {
   $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
-  $fedora_prefix = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
-  $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $pid . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
-  $pageData = json_decode(file_get_contents($filename));
-  return $pageData;
+  $fedora_prefix = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
+  // @todo Determine if datastream should come from fedora or though islandora.
+  $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $object_id . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
+  $page_data = json_decode(file_get_contents($filename));
+  return $page_data;
 }
 
 /**
@@ -225,79 +224,83 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
 }
 
 /**
- * 
+ *
  * @global url $base_url
- * @param string $book
+ * @param string $object_id
  *  the pid of the book
  * @param type $ocr_term
  *  the text to search for
- * @return void 
+ * @return void
  */
-function islandora_bookviewer_ocr_search($book, $ocr_term) {
-  global $base_url;
+function islandora_bookviewer_ocr_search($object_id, $ocr_term) {
   $request_handler = variable_get("islandora_solr_search_block_request_handler", "standard");
-  $ocr_term = htmlspecialchars(drupal_urlencode($ocr_term), ENT_QUOTES, 'utf-8', FALSE); //allow multiple words
+  // Allow multiple words
+  $ocr_term = htmlspecialchars(drupal_urlencode($ocr_term), ENT_QUOTES, 'utf-8', FALSE);
   $solr_url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
-  $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.isSequenceNumber'); //not configurable yet, not exposed in the form.
-  $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'OCR.OCR'); 
-  $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels.isMemberOf'); //defaults to original specified in Jason's code
-  $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" . $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $book . "\"&version=2.2&start=0&rows=" . variable_get('islandora_bookviewer_solr_result_count', 32) .
-      "&fl=PID,$sequence_field&hl=true&hl.fl=$ocr_field&hl.snippets=200&hl.simple.pre={{{&hl.simple.post=}}}&hl.fragsize=200&wt=json";
+  // Not configurable yet, not exposed in the form.
+  $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.isSequenceNumber');
+  $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'OCR.OCR');
+  $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels.isMemberOf');
+  // Defaults to original specified in Jason's code
+  $url = $solr_url . "/select/?qt=$request_handler&q=$ocr_field:\"" .
+    $ocr_term . "\"&fq=$ocr_filter_field:\"info:fedora/" . $object_id .
+    "\"&version=2.2&start=0&rows=" . variable_get('islandora_bookviewer_solr_result_count', 32) .
+    "&fl=PID,$sequence_field&hl=true&hl.fl=$ocr_field&hl.snippets=200&hl.simple.pre={{{&hl.simple.post=}}}&hl.fragsize=200&wt=json";
   $url_array = parse_url($url);
   if (!isset($url_array['scheme'])) {
-    $url = 'http://' . $url; //default to http if they need https they should set it in the islandora solr config form.
+    // Default to http if they need https they should set it in the islandora solr config form.
+    $url = 'http://' . $url;
   }
   $json = drupal_http_request($url);
   if (is_callable('json_decode')) {
     $result_obj = json_decode($json->data);
   }
   else {
-    //break 
+    // Break
     watchdog('islandora_bookviewer', 'No json_decode', array(), WATCHDOG_ERROR);
-    // send back something empty
+    // Send back something empty
     return;
   }
   $output = array('matches' => array());
   foreach ($result_obj->response->docs as $doc) {
-    //getting page height width from djatoka would be more efficient if this was in solr
-    //TODO: index page width and height in solr so we have it in the results
+    // Getting page height width from djatoka would be more efficient if this was in solr
+    // @todo Index page width and height in solr so we have it in the results
     $page_data = islandora_bookviewer_get_page_data($doc->PID);
-    $page = $doc->{"$sequence_field"}[0]; //hack to get a page in case the defined field has a . or other symbol
+    // Hack to get a page in case the defined field has a . or other symbol
+    $page = $doc->{"$sequence_field"}[0];
     $doc_pid = $doc->PID;
     $highlighting = $result_obj->highlighting;
-    //check plain does not seem to fix some of the data example &gt; 
+    // Check plain does not seem to fix some of the data example &gt;
     $ocr_returned = preg_replace('/[^a-zA-Z0-9-\n {}]/', '', $highlighting->{"$doc_pid"}->{"$ocr_field"}[0]);
     $boxes = islandora_bookviewer_populate_boxes($doc->PID, $page, $ocr_term);
     $output['matches'][] = array(
-      'text' => $ocr_returned, //$doc->PID,
+      'text' => $ocr_returned,
       'par' => array(
         array(
           'page' => intval($page),
           'page_width' => $page_data->width,
           'page_height' => $page_data->height,
-          //'r' => '2024',
-          //'b' => '1090',
-          //'t' => '700',
-          //'l' => '192',
           'boxes' => $boxes,
         ),
       )
     );
   }
-
   drupal_json($output);
   exit();
 }
 
-function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &$form_state) {
-
-  $djatoka_path = isset($form_state['values']['islandora_djatoka_path']) ? $form_state['values']['islandora_djatoka_path'] : variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka');
+/**
+ * @todo Implement form in book sp
+ */
+function islandora_bookviewer_form_islandora_book_admin_settings_alter(array &$form, array &$form_state) {
+  $djatoka_path = isset($form_state['values']['islandora_djatoka_path']) ?
+    $form_state['values']['islandora_djatoka_path'] :
+    variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka');
   $djatoka_avail = is_url_valid($djatoka_path);
   $confirmation_message = ($djatoka_avail ? '<img src="' . url('misc/watchdog-ok.png') . '"/>'
           . t('Djatoka url is valid.') : '<img src="'
           . url('misc/watchdog-error.png') . '"/> '
           . t('Unable to locate djatoka installation at !tile_path</p>', array('!tile_path' => $djatoka_path)));
-
   $form['book_ahah_wrapper']['islandora_djatoka_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to Djatoka'),
@@ -315,7 +318,9 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#value' => $confirmation_message,
   );
 
-  $show_ia_logo = isset($form_state['values']['islandora_bookviewer_show_ia_logo']) ? $form_state['values']['islandora_bookviewer_show_ia_logo'] : variable_get('islandora_bookviewer_show_ia_logo', TRUE);
+  $show_ia_logo = isset($form_state['values']['islandora_bookviewer_show_ia_logo']) ?
+    $form_state['values']['islandora_bookviewer_show_ia_logo'] :
+    variable_get('islandora_bookviewer_show_ia_logo', TRUE);
   $form['book_ahah_wrapper']['islandora_bookviewer_show_ia_logo'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show IA icon in bookviewer'),
@@ -323,8 +328,9 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#default_value' => $show_ia_logo,
   );
 
-  //$default_view = isset($form_state['values']['islandora_bookviewer_default_view']) ? $form_state['values']['islandora_bookviewer_default_view'] : variable_get('islandora_bookviewer_default_view', 2);
-  $default_view = isset($form_state['values']['islandora_bookviewer_default_view']) ? $form_state['values']['islandora_bookviewer_default_view'] : variable_get('islandora_bookviewer_default_view', '2up');
+  $default_view = isset($form_state['values']['islandora_bookviewer_default_view']) ?
+    $form_state['values']['islandora_bookviewer_default_view'] :
+    variable_get('islandora_bookviewer_default_view', '2up');
   $form['book_ahah_wrapper']['islandora_bookviewer_default_view'] = array(
     '#type' => 'select',
     '#title' => t('Default IA bookviewer view'),
@@ -360,6 +366,7 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#description' => t('The level of compression we want djatoka to use when creating the image, usually set at 4 or 5.'),
     '#default_value' => variable_get('islandora_bookviewer_compression', '4'),
   );
+  // @todo Enforce that this field is numeric.
   $form['book_ahah_wrapper']['islandora_bookviewer_solr_result_count'] = array(
     '#type' => 'textfield',
     '#title' => t('The maximum number of results to return in a solr query'),
@@ -367,99 +374,3 @@ function islandora_bookviewer_form_islandora_book_admin_settings_alter(&$form, &
     '#default_value' => variable_get('islandora_bookviewer_solr_result_count', '32'),
   );
 }
-
-function islandora_bookviewer_form_validate($form, &$form_state) {
-  if (!is_numeric($form_state['values']['islandora_bookviewer_solr_result_count'])) {
-    form_set_error('islandora_bookviewer_solr_result_count', t('Please enter a numeric value'));
-  }
-}
-
-/**
- * Provides page information for Bookviewer
- * To be invoked with ajax
- * @global url $base_url
- * @param string $pid
- */
-function islandora_bookviewer_setup($pid) {
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  global $base_url;
-  $item = new Fedora_Item($pid);
-  $label = $item->objectProfile->objLabel;
-  $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
-  $islandora_prefix = $base_url . '/fedora/repository/';
-  $fedora_prefix = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
-  $book_pids = get_page_pids($pid);
-  $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $book_pids[1] . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
-  $pageData = json_decode(file_get_contents($filename));
-  $pageProgression = get_page_progression($pid);
-  $configs = array();
-  $configs['DJATOKA_PREFIX'] = $djatoka_prefix;
-  $configs['ISLANDORA_PREFIX'] = $islandora_prefix;
-  $configs['FEDORA_PREFIX'] = $fedora_prefix;
-  $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression', '4');
-  $configs['book_pids'] = $book_pids;
-  $configs['page_width'] = $pageData->width;
-  $configs['page_height'] = $pageData->height;
-  $configs['page_count'] = count($book_pids);
-  $configs['page_progression'] = $pageProgression;
-  $configs['label'] = $label;
-  $configs['base_url'] = $base_url;
-  $configs['module_path'] = drupal_get_path('module', 'islandora_bookviewer');
-  $json = json_encode($configs);
-  echo $json;
-}
-
-/**
- * pulled this out of book_pack_utils as different viewers may want to use different queries
- * 
- * 
- * @param string $book_pid
- *  the pid of the book object
- * @return array
- *  an array of pids, one for each page ordered by sequence number 
- */
-function islandora_bookviewer_get_sorted_page_pids($book_pid) {
-  $query = <<<XML
-  select \$object \$page from <#ri>
-where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
-and \$object <fedora-model:state> <fedora-model:Active>
-and \$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
-order by \$page
-XML;
-
-  module_load_include('inc', 'fedora_repository', 'CollectionClass');
-  $collection = new CollectionClass($book_pid);
-  $contents = $collection->getRelatedItems($book_pid, $query);
-  $results_xml = simplexml_load_string($contents);
-  $resultsarray = array();
-  $book_pids = array();
-  foreach ($results_xml->results->result as $result) {
-    $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
-    $number = (string) $result->page[0];
-    $book_pids[$number] = $page;
-  }
-
-  return $book_pids;
-}
-
-/**
- * add the username and password of ANONYMOUS and ANONYMOUS
- * this will get us by sites where fedora apia calls ask for credentials the drupal servlet filter
- * should recognize ANONYMOUS as the islandora anonymous user
- * @todo possibly add real drupal username and password hash here for sites where there might be
- * xacml
- * 
- * @param string $fedora_prefix
- * @return string 
- */
-function islandora_bookviewer_inject_creds($fedora_prefix) {
-  $parts = array();
-  $parts = parse_url($fedora_prefix);
-  $parts['user'] = 'ANONYMOUS';
-  $parts['pass'] = 'ANONYMOUS';
-  $fedora_prefix = $parts['scheme'] . '://' . $parts['user'] . ':' . $parts['pass'] . '@' . $parts['host'] . ':' . $parts['port'] . $parts['path'];
-
-  return $fedora_prefix;
-}
-

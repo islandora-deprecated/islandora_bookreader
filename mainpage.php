@@ -1,14 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-
 <html>
   <head>
     <title>Islandora Reader</title>
-
     <link rel="stylesheet" type="text/css" href="css/BookReader.css"/>
     <!-- Custom CSS overrides -->
     <link rel="stylesheet" type="text/css" href="css/BookReaderDemo.css"/>
     <link rel="stylesheet" type="text/css" href="css/mods2html.css"/>
-
     <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
     <script type="text/javascript" src="js/dragscrollable.js"></script>
@@ -17,18 +14,14 @@
     <script type="text/javascript" src="js/jquery.bt.min.js"></script>
     <script type="text/javascript" src="js/BookReader.js"></script>
     <script type="text/javascript" src="js/islandora_loader.js"></script>
-
   </head>
   <body style="background-color: #939598;">
-
     <div id="BookReader" style="left:10px; right:10px; top:10px; bottom:2em;">Loading Bookreader, please wait...</div>
-
     <script type="text/javascript">
       //
       // This file shows the minimum you need to provide to BookReader to display a book
       //
       // Copyright(c)2008-2009 Internet Archive. Software license AGPL version 3.
-
       // Create the BookReader object
       br = new BookReader();
       br.structMap = new Array();
@@ -43,13 +36,13 @@
       br.baseUrl = islandora_params.base_url;
       br.module_path = islandora_params.module_path;
       br.getPageWidth = function(index) {
-        return br.width;      
+        return br.width;
       }
 
       // Return the height of a given page.
       br.getPageHeight = function(index) {
         return br.height;
-      }  
+      }
 
       // We load the images from fedora
       // using a different URL structure
@@ -58,12 +51,10 @@
         // could e.g. look at reduce and load images from a different directory
         // or pass the information to an image server
         var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
-       // var url = br.djatoka_prefix + br.islandora_prefix + leafStr + '/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
-       var url = br.djatoka_prefix + br.fedora_prefix + '/objects/' + leafStr + '/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
-        
+        var url = br.djatoka_prefix + br.fedora_prefix + '/objects/' + leafStr + '/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + br.compression + '&svc.rotate=0';
         return url;
       }
-      
+
       br.getOcrURI = function (index){
         var indices = br.getSpreadIndices(index);
         var pidL = br.structMap[indices[0]+1]; // pid for left page
@@ -163,7 +154,7 @@
 
       // Book title and the URL used for the book title link
       br.bookTitle = islandora_params.label;
-      if (br.bookTitle.length > 100){
+      if (br.bookTitle.length > 100) {
         br.bookTitle =  br.bookTitle.substring(0,97)+'...';
       }
       // book url should be created dynamically
@@ -176,7 +167,7 @@
         return "Embed code not supported in bookreader demo.";
       }
 
-      
+
       function getURLParam(name) {
         // get query string part of url into its own variable
         var url = window.location.href;
@@ -203,7 +194,7 @@
       if (query != "") {
         br.search(query);
       }
-      
+
       br.initUIStrings = function() {
     // Navigation handlers will be bound after all UI is in place -- makes moving icons between
     // the toolbar and nav bar easier
@@ -253,17 +244,16 @@
             }
         }
     }
-      
-     
+
+
       // Let's go!
       br.init();
-      
+
       // read-aloud and search need backend compenents and are not supported in the demo
       $('#BRtoolbar').find('.read').hide();
       //$('#textSrch').hide();
       //$('#btnSrch').hide();
 
     </script>
-
   </body>
 </html>
