@@ -147,12 +147,13 @@ function islandora_bookreader_get_ocr(FedoraObject $left_object, FedoraObject $r
 function islandora_bookreader_setup(FedoraObject $object) {
   global $base_url;
   // @todo $base_url can be accessed client side via Drupal object.
+  //   Although this when the viewer is rendered it is done so in an iframe.
   // @todo I dislike circular dependancies, needed for get_page_pids().
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $book_pids = get_page_pids($object->id);
   $page_data = islandora_bookviewer_get_page_data($book_pids[1]);
   $configs = array();
-  $configs['DJATOKA_PREFIX'] = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
+  $configs['DJATOKA_PREFIX'] = variable_get('islandora_bookviewer_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
   $configs['ISLANDORA_PREFIX'] = $base_url . '/islandora/object/';
   $configs['FEDORA_PREFIX'] = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   $configs['COMPRESSION'] = variable_get('islandora_bookviewer_compression', '4');
@@ -180,54 +181,13 @@ function islandora_bookreader_setup(FedoraObject $object) {
  * @return
  */
 function islandora_bookviewer_get_page_data($object_id) {
-  $djatoka_prefix = variable_get('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka') . '/resolver?url_ver=Z39.88-2004&rft_id=';
+  $djatoka_prefix = variable_get('islandora_bookviewer_djatoka_path', 'http://localhost:8080/adore-djatoka');
+  $djatoka_prefix .= '/resolver?url_ver=Z39.88-2004&rft_id=';
   $fedora_prefix = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   // @todo Determine if datastream should come from fedora or though islandora.
   $filename = $djatoka_prefix . "$fedora_prefix/objects/" . $object_id . "/datastreams/JP2/content&svc_id=info:lanl-repo/svc/getMetadata";
   $page_data = json_decode(file_get_contents($filename));
   return $page_data;
-}
-
-/**
- *
- * @param string $pid
- * @param string $page
- * @param string $term
- * @return array
- */
-function islandora_bookviewer_populate_boxes($pid, $page, $term) {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $item = new Fedora_Item($pid);
-  $wordsxy = $item->get_datastream_dissemination('ENCODED_OCR');
-  if (!isset($wordsxy)) {
-    return array();
-  }
-  $xml = @simplexml_load_string($wordsxy);
-  if (!$xml) {
-    return array();
-  }
-
-  $namespaces = $xml->getDocNamespaces();
-  $count_ns = count($namespaces);
-  $lower_term = strtolower($term);
-  $lower_term = urldecode($lower_term);
-  $terms = explode(' ', $lower_term);
-  $boxes = array();
-  foreach ($terms as $t) {
-    if (count($namespaces) > 0) { //tesseract does not add a namespace so check for one
-      $xml->registerXPathNamespace('ns', $namespaces['']);
-      $matches = $xml->xpath('//ns:span[.="' . $t . '"]');
-    }
-    else {
-      $matches = $xml->xpath('//span[.="' . $t . '"]');
-    }
-    foreach ($matches as $match) {
-      $bbox = (string) $match['title'];
-      $values = explode(' ', $bbox);
-      $boxes[] = array('l' => intval($values[1]), 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
-    }
-  }
-  return $boxes;
 }
 
 /**
@@ -240,7 +200,10 @@ function islandora_bookviewer_populate_boxes($pid, $page, $term) {
  * @return void
  */
 function islandora_bookviewer_ocr_search($object_id, $ocr_term) {
-  $request_handler = variable_get("islandora_solr_search_block_request_handler", "standard");
+  /**
+   * Deal with this later!
+   *
+  $request_handler = variable_get('islandora_solr_search_block_request_handler', 'standard');
   // Allow multiple words
   $ocr_term = htmlspecialchars(drupal_urlencode($ocr_term), ENT_QUOTES, 'utf-8', FALSE);
   $solr_url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
@@ -294,4 +257,45 @@ function islandora_bookviewer_ocr_search($object_id, $ocr_term) {
   }
   drupal_json($output);
   exit();
+  */
+}
+
+/**
+ * Get word coordinates.
+ *
+ * @param FedoraObject $object
+ * @param string $page
+ * @param string $term
+ *
+ * @return array
+ */
+function islandora_bookviewer_populate_boxes(FedoraObject $object, $page, $term) {
+  $wordsxy = isset($object['ENCODED_OCR']) ? $object['ENCODED_OCR']->content : NULL;
+  if (!isset($wordsxy)) {
+    return array();
+  }
+  $xml = @simplexml_load_string($wordsxy);
+  if (!$xml) {
+    return array();
+  }
+  $namespaces = $xml->getDocNamespaces();
+  $lower_term = strtolower($term);
+  $lower_term = urldecode($lower_term);
+  $terms = explode(' ', $lower_term);
+  $boxes = array();
+  foreach ($termerms as $term) {
+    if (count($namespaces) > 0) { // tesseract does not add a namespace so check for one
+      $xml->registerXPathNamespace('ns', $namespaces['']);
+      $matches = $xml->xpath('//ns:span[.="' . $term . '"]');
+    }
+    else {
+      $matches = $xml->xpath('//span[.="' . $term . '"]');
+    }
+    foreach ($matches as $match) {
+      $bbox = (string) $match['title'];
+      $values = explode(' ', $bbox);
+      $boxes[] = array('l' => intval($values[1]), 't' => intval($values[2]) - 15, 'r' => intval($values[3]) + 20, 'b' => intval($values[4]) + 15, 'page' => $page);
+    }
+  }
+  return $boxes;
 }

@@ -21,7 +21,7 @@ function islandora_bookreader_admin_settings_form(array $form, array &$form_stat
   $get_default_value = function($name, $default) use($form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
-  $djatoka_url = $get_default_value('islandora_djatoka_path', 'http://localhost:8080/adore-djatoka/');
+  $djatoka_url = $get_default_value('islandora_bookviewer_djatoka_path', 'http://localhost:8080/adore-djatoka/');
   $djatoka_availible_message = islandora_bookreader_admin_settings_form_djatoka_availible_message($djatoka_url);
   $form = array(
     'islandora_bookviewer_show_ia_logo' => array(
@@ -30,7 +30,7 @@ function islandora_bookreader_admin_settings_form(array $form, array &$form_stat
       '#description' => t('Display icon and link in the upper left corner.'),
       '#default_value' => $get_default_value('islandora_bookviewer_show_ia_logo', TRUE)
     ),
-    'islandora_djatoka_path' => array(
+    'islandora_bookviewer_djatoka_path' => array(
       '#type' => 'textfield',
       '#prefix' => '<div id="djatoka-path-wrapper">',
       '#suffix' => '</div>',
@@ -116,5 +116,5 @@ function islandora_bookreader_admin_settings_form_djatoka_availible_message($dja
  *   The element to render as part the ajax callback.
  */
 function islandora_bookreader_admin_settings_form_djatoka_ajax_callback(array $form, array &$form_state) {
-  return $form['islandora_djatoka_path'];
+  return $form['islandora_bookviewer_djatoka_path'];
 }
