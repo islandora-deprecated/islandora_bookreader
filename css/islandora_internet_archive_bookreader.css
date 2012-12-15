@@ -14,20 +14,6 @@ div#BRnav {
 div.BRpagediv1up {
  overflow: visible;
 }
-.ocrTop {
-  font-size: 10px;
-}
-.ocrRight {
-  float: right;
-  width: 270px;
-}
-.ocrLeft {
-  float: left;
-  width: 270px;
-}
-.ocrContainer{
-    backgrounc-color: #ffffff;
-}
 .BRicon.full_text {
   display: block;
   float: left;
@@ -45,4 +31,15 @@ div.BRpagediv1up {
 }
 .BRicon.full_text:hover {
   background-position: -1280px 0px;
+}
+.textTop {
+  font-size: 10px;
+}
+.textRight {
+  float: right;
+  width: 270px;
+}
+.textLeft {
+  float: left;
+  width: 270px;
 }

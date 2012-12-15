@@ -98,6 +98,11 @@ function IslandoraBookReader(settings) {
   }
 
   /**
+   * Gets the reduce rate for the single page view, this is used to scale the
+   * image to fit into the viewer window.
+   *
+   * @return int
+   *   The width reduce rate.
    */
   IslandoraBookReader.prototype.onePageGetAutofitWidth = function() {
     var widthPadding = 20;
@@ -105,16 +110,21 @@ function IslandoraBookReader(settings) {
   }
 
   /**
+   * Gets the reduce rate for the single page view, this is used to scale the
+   * image to fit into the viewer window.
+   *
+   * @return int
+   *   The height reduce rate.
    */
   IslandoraBookReader.prototype.onePageGetAutofitHeight = function() {
-    return (this.getMedianPageSize().height) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
+    return (this.getMedianPageSize().height) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2);
   }
 
   /**
    * Gets the Djatoka URI.
    *
    * @param string resource_uri
-   *   The uri to the JP2 image Djatoka will use.
+   *   The uri to the image Djatoka will use.
    *
    * @return string
    *   The Djatoka URI for the given resource URI.
@@ -135,26 +145,23 @@ function IslandoraBookReader(settings) {
    */
   IslandoraBookReader.prototype.getDjatokaUriParams = function() {
     // @todo expose the parameters to the theme function, only compression
-    //   is being used at the moment.
+    // is being used at the moment.
     return '&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=' + this.settings.compression + '&svc.rotate=0';
   };
 
   /**
-   * Gets the URI to the given objects datastream.
+   * Gets the URI to the given objects resource.
    *
    * @param string pid
-   *   The id of the object containing the given datastream.
-   * @param string dsid
-   *   The id of the datastream the URI will reference.
+   *   The id of the object containing the resource.
    *
    * @return string
-   *   The Resource URI to the given datastream, to be displayed in the
+   *   The Resource URI of the image, to be displayed in the
    *   viewer.
    */
-  IslandoraBookReader.prototype.getResourceUri = function(pid, dsid) {
+  IslandoraBookReader.prototype.getResourceUri = function(pid) {
     var uri = this.settings.resourceUri;
     uri = uri.replace('PID', pid);
-    uri = uri.replace('DSID', dsid);
     return uri;
   };
 
@@ -169,23 +176,22 @@ function IslandoraBookReader(settings) {
    */
   IslandoraBookReader.prototype.getPageURI = function(index, reduce, rotate) {
     var pid = this.getPID(index);
-    // Hard code for JP2 for now, later move to settings.
-    var resource_uri = this.getResourceUri(pid, 'JP2');
+    var resource_uri = this.getResourceUri(pid);
     return this.getDjatokaUri(resource_uri);
   }
 
   /**
-   * Get the URI to the OCR content for the given page object.
+   * Get the URI to the text content for the given page object.
    * This content will be displayed in the full text modal dialog box.
    *
    * @param string pid
-   *   The page object to fetch the OCR content from.
+   *   The page object to fetch the text content from.
    *
    * @return string
    *   The URI
    */
-  IslandoraBookReader.prototype.getOcrURI = function (pid) {
-    return this.settings.ocrUri.replace('PID', pid);
+  IslandoraBookReader.prototype.getTextURI = function (pid) {
+    return this.settings.textUri.replace('PID', pid);
   }
 
   /**
@@ -532,7 +538,7 @@ function IslandoraBookReader(settings) {
     if (1 == this.mode) {
       var index = this.currentIndex();
       var pid = this.getPID(index);
-      $.get(this.getOcrURI(pid),
+      $.get(this.getTextURI(pid),
             function(data) {
               jFullTextDiv.find('.BRfloatMeta').html(data);
             });
@@ -540,24 +546,24 @@ function IslandoraBookReader(settings) {
       jFullTextDiv.find('.BRfloatMeta').html('<div>Full Text Not supported for this view.</div>');
     } else {
       var twoPageText = $([
-      '<div class="ocrTop">',
-         '<div class="ocrLeft"></div>',
-         '<div class="ocrRight"></div>',
+      '<div class="textTop">',
+         '<div class="textLeft"></div>',
+         '<div class="textRight"></div>',
       '</div>'].join('\n'));
       jFullTextDiv.find('.BRfloatMeta').html(twoPageText);
       var indices = this.getSpreadIndices(this.currentIndex());
       var left_pid = this.getPID(indices[0]);
       var right_pid = this.getPID(indices[1]);
       if(left_pid) {
-        $.get(this.getOcrURI(left_pid),
+        $.get(this.getTextURI(left_pid),
               function(data) {
-                jFullTextDiv.find('.ocrLeft').html(data);
+                jFullTextDiv.find('.textLeft').html(data);
               });
       }
       if(right_pid) {
-        $.get(this.getOcrURI(right_pid),
+        $.get(this.getTextURI(right_pid),
               function(data) {
-                jFullTextDiv.find('.ocrRight').html(data);
+                jFullTextDiv.find('.textRight').html(data);
               });
       }
     }

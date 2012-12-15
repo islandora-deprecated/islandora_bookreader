@@ -15,7 +15,7 @@
  * @param FedoraObject $object
  *   The page object whose OCR data-stream will be used for display.
  */
-function islandora_internet_archive_bookreader_get_page_ocr(FedoraObject $object) {
+function islandora_internet_archive_bookreader_get_page_text(FedoraObject $object) {
   echo (isset($object['OCR']) ? htmlspecialchars($object['OCR']->content) : '');
   drupal_exit();
 }

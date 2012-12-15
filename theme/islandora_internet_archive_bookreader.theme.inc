@@ -12,28 +12,28 @@
 function islandora_internet_archive_bookreader_preprocess_islandora_internet_archive_bookreader(array &$variables) {
   module_load_include('inc', 'islandora_internet_archive_bookreader', 'includes/utilities');
   $object = $variables['object'];
+  $dsid = $variable['datastream_id'];
   $library_path = libraries_get_path('bookreader');
   $module_path = drupal_get_path('module', 'islandora_internet_archive_bookreader');
   $search_uri = module_exists('islandora_solr') ? url("internet_archive_bookreader_search/{$object->id}/TERM", array('absolute' => TRUE)) : NULL;
-  $resource_uri = url('islandora/object/PID/datastream/JP2/view', array('absolute' => TRUE));
+  $resource_uri = url("islandora/object/PID/datastream/{$dsid}/view", array('absolute' => TRUE));
   $page_data = islandora_internet_archive_bookreader_get_page_data($variables['pages'][0]);
   // Get token to allow access to XACML protected datastreams if necessary.
   if (isset($object['POLICY'])) {
     module_load_include('inc', 'islandora', 'includes/islandora_authtokens');
-    $token = islandora_get_object_token($object->id, 'JP2', 2);
-    $resource_uri = url("islandora/object/{$islandora_object->id}/datastream/JP2/view", array(
+    $token = islandora_get_object_token($object->id, $dsid, 2);
+    $resource_uri = url("islandora/object/{$islandora_object->id}/datastream/{$dsid}/view", array(
                       'absolute' => TRUE,
                       'query' => array('token' => $token),
                     ));
   }
-  // @todo Get the page width and height from Djatoka when not explicitly given.
   drupal_add_js(array(
       'islandoraInternetArchiveBookReader' => array(
         'book' => $object->id,
         'info' => theme('islandora_internet_archive_bookreader_book_info', array('object' => $object)),
         'label' => $object->label,
         'searchUri' => $search_uri,
-        'ocrUri' => url('internet_archive_bookreader_ocr/PID', array('absolute' => TRUE)),
+        'textUri' => url('internet_archive_bookreader_text/PID', array('absolute' => TRUE)),
         'djatokaUri' => variable_get('islandora_internet_archive_bookreader_djatoka_url', 'http://localhost:8080/adore-djatoka'),
         'resourceUri' => $resource_uri,
         'imagesFolderUri' => url("$library_path/BookReader/images/", array('absolute' => TRUE)),
