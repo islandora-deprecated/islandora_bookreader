@@ -27,9 +27,25 @@ function IslandoraBookReader(settings) {
    * For example, index 5 might correspond to "Page 1" if there is front matter such
    * as a title page and table of contents.
    * for now we just show the image number
+   *
+   * @param int index
+   *   The index of the page.
    */
   IslandoraBookReader.prototype.getPageNum = function(index) {
     return index + 1;
+  }
+
+  /**
+   * Gets the index for the given leaf number.
+   *
+   * @param int leafNum
+   *   The leaf number.
+   *
+   * @return int
+   *   The index of the given leaf number.
+   */
+  IslandoraBookReader.prototype.leafNumToIndex = function(leafNum) {
+    return leafNum-1;
   }
 
   /**
@@ -222,6 +238,35 @@ function IslandoraBookReader(settings) {
   }
 
   /**
+   * @x
+   */
+  IslandoraBookReader.prototype.BRSearchCallback = function(results) {
+    this.removeSearchResults();
+    this.searchResults = results;
+    if (0 == results.matches.length) {
+      var errStr  = 'No matches were found.';
+      var timeout = 1000;
+      if (false === results.indexed) {
+        errStr  = "<p>This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!</p>";
+        timeout = 5000;
+      }
+      $(this.popup).html(errStr);
+      setTimeout(function(){
+        $(this.popup).fadeOut('slow', function() {
+          this.removeProgressPopup();
+        })
+      },timeout);
+      return;
+    }
+    var i;
+    for (i=0; i<results.matches.length; i++) {
+      this.addSearchResult(results.matches[i].text, this.leafNumToIndex(results.matches[i].par[0].page));
+    }
+    this.updateSearchHilites();
+    this.removeProgressPopup();
+  }
+
+  /**
    * Embed code is not supported at the moment.
    */
   IslandoraBookReader.prototype.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
@@ -295,7 +340,7 @@ function IslandoraBookReader(settings) {
     $("#BookReader").append(
       "<div id='BRtoolbar'>"
         +   "<span id='BRtoolbarbuttons'>"
-        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
+        +     "<form  id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
@@ -310,6 +355,14 @@ function IslandoraBookReader(settings) {
         +   "<div id='BRnavCntlTop' class='BRnabrbuvCntl'></div>"
         + "</div>"
     );
+    // Attach submit handler to form.
+    var that = this;
+    $('#BRtoolbarbuttons > form').submit(function(event) {
+      event.preventDefault();
+      that.search($('#textSrch').val());
+      return false;
+    });
+
     // Browser hack - bug with colorbox on iOS 3 see https://bugs.launchpad.net/bookreader/+bug/686220
     if ( navigator.userAgent.match(/ipad/i) && $.browser.webkit && (parseInt($.browser.version, 10) <= 531) ) {
       $('#BRtoolbarbuttons .info').hide();

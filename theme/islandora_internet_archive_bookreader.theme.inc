@@ -9,12 +9,14 @@
 /**
  * Implements hook_preprocess_theme().
  */
-function islandora_internet_archive_bookreader_preprocess_islandora_bookviewer_internet_archive_bookreader(array &$variables) {
+function islandora_internet_archive_bookreader_preprocess_islandora_internet_archive_bookreader(array &$variables) {
+  module_load_include('inc', 'islandora_internet_archive_bookreader', 'includes/utilities');
   $object = $variables['object'];
   $library_path = libraries_get_path('bookreader');
   $module_path = drupal_get_path('module', 'islandora_internet_archive_bookreader');
   $search_uri = module_exists('islandora_solr') ? url("internet_archive_bookreader_search/{$object->id}/TERM", array('absolute' => TRUE)) : NULL;
   $resource_uri = url('islandora/object/PID/datastream/JP2/view', array('absolute' => TRUE));
+  $page_data = islandora_internet_archive_bookreader_get_page_data($variables['pages'][0]);
   // Get token to allow access to XACML protected datastreams if necessary.
   if (isset($object['POLICY'])) {
     module_load_include('inc', 'islandora', 'includes/islandora_authtokens');
@@ -39,9 +41,10 @@ function islandora_internet_archive_bookreader_preprocess_islandora_bookviewer_i
         'pageProgression' => $variables['page_progression'],
         'pages' => $variables['pages'],
         'pageCount' => count($variables['pages']),
-        // Use the same width and height for all pages.
-        'height' => $variables['height'],
-        'width' => $variables['width'],
+        // Use the same width and height for all pages, we will probably have to
+        // change this in the future
+        'height' => $page_data['height'],
+        'width' => $page_data['width'],
       ),
     ), 'setting');
   drupal_add_css("$library_path/BookReader/BookReader.css");

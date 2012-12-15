@@ -57,13 +57,13 @@ function islandora_internet_archive_bookreader_admin_settings_form(array $form, 
       '#description' => t('When we search within a book we need to know the pid of the book. This would be the solr field that contains the book pid for each page object.'),
       '#default_value' => $get_default_value('islandora_internet_archive_bookreader_ocr_filter_field', 'rels.isMemberOf')
     ),
-   'islandora_internet_archive_bookreader_solr_result_count' => array(
+    'islandora_internet_archive_bookreader_solr_result_count' => array(
       '#type' => 'textfield',
       '#title' => t('The maximum number of results to return in a solr query'),
       '#description' => t('The maximum number of pages that will be returned by a full text search.'),
       '#element_validate' => array('element_validate_number'),
       '#default_value' => $get_default_value('islandora_internet_archive_bookreader_solr_result_count', '32')
-    )
+    ),
     'islandora_internet_archive_bookreader_sequence_number' => array(
       '#type' => 'textfield',
       '#title' => t('A field that holds the page sequence numbers'),

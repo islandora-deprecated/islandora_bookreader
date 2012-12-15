@@ -22,8 +22,8 @@ function islandora_internet_archive_bookreader_search($object_id, $term) {
   if (!module_exists('islandora_solr')) {
     drupal_exit();
   }
-  $results = islandora_bookviewer_query_solr($object_id, $term);
-  $results = islandora_bookviewer_map_solr_results_to_bookviewer_results($results, $term);
+  $results = islandora_internet_archive_bookreader_query_solr($object_id, $term);
+  $results = islandora_internet_archive_bookreader_map_solr_results_to_bookreader_results($results, $term);
   drupal_json_output($results);
   drupal_exit();
 }
@@ -61,6 +61,7 @@ function islandora_internet_archive_bookreader_query_solr($object_id, $term) {
  *   The results in BookReader format including word coordinates.
  */
 function islandora_internet_archive_bookreader_map_solr_results_to_bookreader_results(array $results, $term) {
+  module_load_include('inc', 'islandora_internet_archive_bookreader', 'includes/utilities');
   $ocr_field = variable_get('islandora_internet_archive_bookreader_ocr_field', 'OCR.OCR');
   $sequence_field = variable_get('islandora_internet_archive_bookreader_sequence_number', 'rels.isSequenceNumber');
   $output = array('matches' => array());
@@ -77,13 +78,14 @@ function islandora_internet_archive_bookreader_map_solr_results_to_bookreader_re
       'par' => array(
         array(
           'page' => intval($page),
-          'page_width' => $page_data->width,
-          'page_height' => $page_data->height,
+          'page_width' => $page_data['width'],
+          'page_height' => $page_data['height'],
           'boxes' => islandora_internet_archive_bookreader_populate_boxes($pid, $page, $term),
         ),
       )
     );
   }
+  return $output;
 }
 
 /**
@@ -132,36 +134,6 @@ function islandora_internet_archive_bookreader_get_solr_search_url($object_id, $
 }
 
 /**
- * Fetches the given page's metadata via Djatoka.
- *
- * @todo Index page width and height in solr so we don't need to call this for
- * every result
- *
- * @param string $object_id
- *   The PID of the page to fetch the metadata for.
- *
- * @return array
- *   The given page's metadata.
- */
-function islandora_internet_archive_bookreader_get_page_data($object_id) {
-  $datastream_url = url("islandora/object/{$object_id}/datastream/JP2/view", array('absolute' => TRUE));
-  $djatoka_params = array(
-    'url_ver=Z39.88-2004',
-    "rft_id={$datastream_url}",
-    'svc_id=info:lanl-repo/svc/getMetadata'
-  );
-  $djatoka_params = implode('&', $djatoka_params);
-  $djatoka_url = variable_get('islandora_bookviewer_djatoka_path', 'http://localhost:8080/adore-djatoka');
-  $djatoka_url .= ($djatoka_url[strlen($djatoka_url)-1] == '/') ? '' : '/';
-  $djatoka_url .= "resolver?{$djatoka_params}";
-  $request = drupal_http_request($djatoka_url);
-  if ($request->code == '200') {
-    return drupal_json_decode($request->data);
-  }
-  return array();
-}
-
-/**
  * Get the word coordinates for the given term and page.
  *
  * @param string $pid
@@ -193,7 +165,7 @@ function islandora_internet_archive_bookreader_populate_boxes($pid, $page, $term
   $lower_term = urldecode($lower_term);
   $terms = explode(' ', $lower_term);
   $boxes = array();
-  foreach ($termerms as $term) {
+  foreach ($terms as $term) {
     $matches = $xml->xpath("//{$span}[.='{$term}']");
     foreach ($matches as $match) {
       $bbox = (string) $match['title'];
