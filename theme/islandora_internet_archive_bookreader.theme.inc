@@ -14,6 +14,16 @@ function islandora_internet_archive_bookreader_preprocess_islandora_bookviewer_i
   $library_path = libraries_get_path('bookreader');
   $module_path = drupal_get_path('module', 'islandora_internet_archive_bookreader');
   $search_uri = module_exists('islandora_solr') ? url("internet_archive_bookreader_search/{$object->id}/TERM", array('absolute' => TRUE)) : NULL;
+  $resource_uri = url('islandora/object/PID/datastream/JP2/view', array('absolute' => TRUE));
+  // Get token to allow access to XACML protected datastreams if necessary.
+  if (isset($object['POLICY'])) {
+    module_load_include('inc', 'islandora', 'includes/islandora_authtokens');
+    $token = islandora_get_object_token($object->id, 'JP2', 2);
+    $resource_uri = url("islandora/object/{$islandora_object->id}/datastream/JP2/view", array(
+                      'absolute' => TRUE,
+                      'query' => array('token' => $token),
+                    ));
+  }
   // @todo Get the page width and height from Djatoka when not explicitly given.
   drupal_add_js(array(
       'islandoraInternetArchiveBookReader' => array(
@@ -23,7 +33,7 @@ function islandora_internet_archive_bookreader_preprocess_islandora_bookviewer_i
         'searchUri' => $search_uri,
         'ocrUri' => url('internet_archive_bookreader_ocr/PID', array('absolute' => TRUE)),
         'djatokaUri' => variable_get('islandora_internet_archive_bookreader_djatoka_url', 'http://localhost:8080/adore-djatoka'),
-        'resourceUri' => url('islandora/object/PID/datastream/DSID/view', array('absolute' => TRUE)),
+        'resourceUri' => $resource_uri,
         'imagesFolderUri' => url("$library_path/BookReader/images/", array('absolute' => TRUE)),
         'compression' => variable_get('islandora_internet_archive_bookreader_compression', '4'),
         'pageProgression' => $variables['page_progression'],
