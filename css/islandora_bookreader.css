@@ -1,0 +1,48 @@
+div#BookReader {
+  position: static;
+}
+div#BRtoolbar {
+  position: static;
+}
+div#BRcontainer {
+  position: relative;
+  height: 600px;
+}
+div#BRnav {
+  position: static;
+}
+div.BRpagediv1up {
+ overflow: visible;
+}
+.ocrTop {
+  font-size: 10px;
+}
+.ocrRight {
+  float: right;
+  width: 270px;
+}
+.ocrLeft {
+  float: left;
+  width: 270px;
+}
+.ocrContainer{
+    backgrounc-color: #ffffff;
+}
+.BRicon.full_text {
+  display: block;
+  float: left;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+  border: none;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url(../images/BRicons.png);
+  background-repeat: no-repeat;
+  background-position: -1240px 0px;
+}
+.BRicon.full_text:hover {
+  background-position: -1280px 0px;
+}

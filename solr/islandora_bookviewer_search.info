@@ -1,6 +1,0 @@
-name = "Islandora Internet Archive BookReader Solr Customizations"
-description = "Customizes Islandora solr search for use with this viewer."
-package = Islandora
-dependencies[] = islandora_solr
-version = 7.x-dev
-core = 7.x

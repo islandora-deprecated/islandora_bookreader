@@ -16,16 +16,7 @@ CONTENTS OF THIS FILE
 SUMMARY
 -------
 
-Book Viewer
-
-A modified version of The Internet Archive BookReader embedded in a drupal module
-
-Developer documentation:
-http://openlibrary.org/dev/docs/bookreader
-
-Hosted source code:
-http://github.com/openlibrary/bookreader
-
+A Islandora wrapper for the Internet Archive BookReader.
 The source code license is AGPL v3, as described in the LICENSE file.
 
 REQUIREMENTS
@@ -35,6 +26,15 @@ REQUIREMENTS
 INSTALLATION
 ------------
 
+Download the Internet Archive BookReader to sites/all/libraries/bookreader.
+
+Cu
+
+Developer documentation:
+http://openlibrary.org/dev/docs/bookreader
+
+Hosted source code:
+http://github.com/openlibrary/bookreader
 
 CONFIGURATION
 -------------
