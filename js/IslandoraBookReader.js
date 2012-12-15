@@ -98,6 +98,19 @@ function IslandoraBookReader(settings) {
   }
 
   /**
+   */
+  IslandoraBookReader.prototype.onePageGetAutofitWidth = function() {
+    var widthPadding = 20;
+    return (this.getMedianPageSize().width) / ($('#BRcontainer').attr('clientWidth') - widthPadding * 2);
+  }
+
+  /**
+   */
+  IslandoraBookReader.prototype.onePageGetAutofitHeight = function() {
+    return (this.getMedianPageSize().height) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
+  }
+
+  /**
    * Gets the Djatoka URI.
    *
    * @param string resource_uri
