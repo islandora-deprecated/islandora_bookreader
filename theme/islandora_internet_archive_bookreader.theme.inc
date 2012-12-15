@@ -9,33 +9,33 @@
 /**
  * Implements hook_preprocess_theme().
  */
-function islandora_bookviewer_preprocess_islandora_bookviewer_internet_archive_bookreader(array &$variables) {
+function islandora_internet_archive_bookreader_preprocess_islandora_bookviewer_internet_archive_bookreader(array &$variables) {
   $object = $variables['object'];
   $library_path = libraries_get_path('bookreader');
-  $module_path = drupal_get_path('module', 'islandora_bookviewer');
-  $pages = array('islandora:439', 'islandora:443', 'islandora:439', 'islandora:443');
-  $search_uri = module_exists('islandora_solr') ? url("bookreader_search/{$object->id}/TERM", array('absolute' => TRUE)) : NULL;
+  $module_path = drupal_get_path('module', 'islandora_internet_archive_bookreader');
+  $search_uri = module_exists('islandora_solr') ? url("internet_archive_bookreader_search/{$object->id}/TERM", array('absolute' => TRUE)) : NULL;
+  // @todo Get the page width and height from Djatoka when not explicitly given.
   drupal_add_js(array(
-      'islandoraBookReader' => array(
+      'islandoraInternetArchiveBookReader' => array(
         'book' => $object->id,
-        'info' => theme('islandora_bookviewer_info', array('object' => $object)),
+        'info' => theme('islandora_internet_archive_bookreader_book_info', array('object' => $object)),
         'label' => $object->label,
         'searchUri' => $search_uri,
-        'ocrUri' => url('bookreader_ocr/PID', array('absolute' => TRUE)),
-        'djatokaUri' => variable_get('islandora_bookviewer_djatoka_path', 'http://localhost:8080/adore-djatoka'),
+        'ocrUri' => url('internet_archive_bookreader_ocr/PID', array('absolute' => TRUE)),
+        'djatokaUri' => variable_get('islandora_internet_archive_bookreader_djatoka_url', 'http://localhost:8080/adore-djatoka'),
         'resourceUri' => url('islandora/object/PID/datastream/DSID/view', array('absolute' => TRUE)),
         'imagesFolderUri' => url("$library_path/BookReader/images/", array('absolute' => TRUE)),
-        'compression' => variable_get('islandora_bookviewer_compression', '4'),
+        'compression' => variable_get('islandora_internet_archive_bookreader_compression', '4'),
         'pageProgression' => $variables['page_progression'],
         'pages' => $variables['pages'],
-        'pageCount' => $variables['pages']),
+        'pageCount' => count($variables['pages']),
         // Use the same width and height for all pages.
         'height' => $variables['height'],
         'width' => $variables['width'],
       ),
     ), 'setting');
   drupal_add_css("$library_path/BookReader/BookReader.css");
-  drupal_add_css("$module_path/css/islandora_bookreader.css");
+  drupal_add_css("$module_path/css/islandora_internet_archive_bookreader.css");
   // jquery 1.4.2 and ui 1.8.5 not being used in favor of the Drupal system.
   drupal_add_library('system', 'effects');
   drupal_add_library('system', 'ui.slider');
@@ -50,15 +50,15 @@ function islandora_bookviewer_preprocess_islandora_bookviewer_internet_archive_b
   drupal_add_js("$library_path/BookReader/jquery.bt.min.js");
   drupal_add_js("$library_path/BookReader/BookReader.js");
   drupal_add_js("$module_path/js/IslandoraBookReader.js");
-  drupal_add_js("$module_path/js/islandora_bookreader.js");
+  drupal_add_js("$module_path/js/islandora_internet_archive_bookreader.js");
 }
 
 /**
  * Implements theme_hook().
  */
-function theme_islandora_bookviewer_info(array $variables) {
+function theme_islandora_internet_archive_bookreader_book_info(array $variables) {
   $object = $variables['object'];
-  $fields = islandora_bookviewer_info_fields($object);
+  $fields = islandora_internet_archive_bookreader_info_fields($object);
   $fields = array_map(function($o) { return implode('<br/>', $o); }, $fields);
   $rows = array_map(null, array_keys($fields), array_values($fields));
   $content = theme_table(array(
@@ -90,7 +90,7 @@ function theme_islandora_bookviewer_info(array $variables) {
  *   )
  * @endcode
  */
-function islandora_bookviewer_info_fields(FedoraObject $object) {
+function islandora_internet_archive_bookreader_info_fields(FedoraObject $object) {
   if (!isset($object['MODS'])) {
     return array();
   }

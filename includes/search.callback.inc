@@ -8,7 +8,8 @@
 
 /**
  * Performs a solr search for the given term within the given book object's
- * pages using SOLR. Returns a JSON object for use in the BookReader.
+ * pages using SOLR. Returns a JSON object for use in the Internet Archive
+ * BookReader.
  *
  * This function exits.
  *
@@ -17,7 +18,7 @@
  * @param type $ocr_term
  *   The text to search for within the OCR'ed text.
  */
-function islandora_bookviewer_search($object_id, $term) {
+function islandora_internet_archive_bookreader_search($object_id, $term) {
   if (!module_exists('islandora_solr')) {
     drupal_exit();
   }
@@ -38,8 +39,8 @@ function islandora_bookviewer_search($object_id, $term) {
  * @return array
  *  The results of the SOLR search.
  */
-function islandora_bookviewer_query_solr($object_id, $term) {
-  $url = islandora_bookviewer_get_solr_search_url($object_id, $term);
+function islandora_internet_archive_bookreader_query_solr($object_id, $term) {
+  $url = islandora_internet_archive_bookreader_get_solr_search_url($object_id, $term);
   $request = drupal_http_request($url);
   if ($request->code == '200') {
     return drupal_json_decode($request->data);
@@ -59,15 +60,15 @@ function islandora_bookviewer_query_solr($object_id, $term) {
  * @return array
  *   The results in BookReader format including word coordinates.
  */
-function islandora_bookviewer_map_solr_results_to_bookreader_results(array $results, $term) {
-  $ocr_field = variable_get('islandora_bookreader_ocr_field', 'OCR.OCR');
-  $sequence_field = variable_get('islandora_bookreader_sequence_number', 'rels.isSequenceNumber');
+function islandora_internet_archive_bookreader_map_solr_results_to_bookreader_results(array $results, $term) {
+  $ocr_field = variable_get('islandora_internet_archive_bookreader_ocr_field', 'OCR.OCR');
+  $sequence_field = variable_get('islandora_internet_archive_bookreader_sequence_number', 'rels.isSequenceNumber');
   $output = array('matches' => array());
   foreach ($results['response']['docs'] as $doc) {
     // @todo Index the page width and height in solr, rather than fetch from
     // djatoka
     $pid = $doc['PID'];
-    $page_data = islandora_bookviewer_get_page_data($pid);
+    $page_data = islandora_internet_archive_bookreader_get_page_data($pid);
     $page = $doc["$sequence_field"][0];
     $highlighting = $results['highlighting'];
     $highlighted_text = $highlighting[$pid][$ocr_field][0];
@@ -78,7 +79,7 @@ function islandora_bookviewer_map_solr_results_to_bookreader_results(array $resu
           'page' => intval($page),
           'page_width' => $page_data->width,
           'page_height' => $page_data->height,
-          'boxes' => islandora_bookviewer_populate_boxes($pid, $page, $term),
+          'boxes' => islandora_internet_archive_bookreader_populate_boxes($pid, $page, $term),
         ),
       )
     );
@@ -97,17 +98,15 @@ function islandora_bookviewer_map_solr_results_to_bookreader_results(array $resu
  *   The SOLR search URL that will query for all occurances of the given term
  *   within the given book.
  */
-function islandora_bookviewer_get_solr_search_url($object_id, $term) {
-  $request_handler = variable_get('islandora_solr_request_handler', '');
+function islandora_internet_archive_bookreader_get_solr_search_url($object_id, $term) {
   $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
-  $request_handler = variable_get('islandora_solr_search_block_request_handler', 'standard');
+  $request_handler = variable_get('islandora_solr_request_handler', '');
+  $sequence_field = variable_get('islandora_internet_archive_bookreader_sequence_number', 'rels.isSequenceNumber');
+  $ocr_field = variable_get('islandora_internet_archive_bookreader_ocr_field', 'OCR.OCR');
+  $ocr_filter_field = variable_get('islandora_internet_archive_bookreader_ocr_filter_field', 'rels.isMemberOf');
+  $num_rows = variable_get('islandora_internet_archive_bookreader_solr_result_count', 32);
   // Allow multiple words
   $term = htmlspecialchars(drupal_encode_path($term), ENT_QUOTES, 'utf-8', FALSE);
-  // Not configurable yet, not exposed in the form.
-  $sequence_field = variable_get('islandora_bookviewer_sequence_number', 'rels.isSequenceNumber');
-  $ocr_field = variable_get('islandora_bookviewer_ocr_field', 'OCR.OCR');
-  $ocr_filter_field = variable_get('islandora_bookviewer_ocr_filter_field', 'rels.isMemberOf');
-  $num_rows = variable_get('islandora_bookviewer_solr_result_count', 32);
   $params = array(
     "qt={$request_handler}",
     "q={$ocr_field}:\"{$term}\"",
@@ -144,7 +143,7 @@ function islandora_bookviewer_get_solr_search_url($object_id, $term) {
  * @return array
  *   The given page's metadata.
  */
-function islandora_bookviewer_get_page_data($object_id) {
+function islandora_internet_archive_bookreader_get_page_data($object_id) {
   $datastream_url = url("islandora/object/{$object_id}/datastream/JP2/view", array('absolute' => TRUE));
   $djatoka_params = array(
     'url_ver=Z39.88-2004',
@@ -175,7 +174,7 @@ function islandora_bookviewer_get_page_data($object_id) {
  * @return array
  *   The word coordinates for the given term and page.
  */
-function islandora_bookviewer_populate_boxes($pid, $page, $term) {
+function islandora_internet_archive_bookreader_populate_boxes($pid, $page, $term) {
   $object = islandora_object_load($pid);
   if (!isset($object['ENCODED_OCR'])) {
     return array();

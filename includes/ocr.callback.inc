@@ -7,15 +7,15 @@
  */
 
 /**
- * Callback used by the BookReader for displaying the given object's OCR
- * data-streams.
+ * Callback used by the Internet Archive BookReader for displaying the given
+ * page object's OCR data-stream.
  *
  * This function exits.
  *
  * @param FedoraObject $object
- *   The object whose OCR data-stream will be used for display.
+ *   The page object whose OCR data-stream will be used for display.
  */
-function islandora_bookreader_get_ocr(FedoraObject $object) {
+function islandora_internet_archive_bookreader_get_page_ocr(FedoraObject $object) {
   echo (isset($object['OCR']) ? htmlspecialchars($object['OCR']->content) : '');
   drupal_exit();
 }

@@ -4,10 +4,10 @@
  * Defines initializing/attaching the Book Reader to the defined element.
  */
 (function ($) {
-  Drupal.behaviors.islandoraBookReader = {
+  Drupal.behaviors.islandoraInternetArchiveBookReader = {
     attach: function(context, settings) {
-      $('.islandora-bookreader', context).once('islandora-bookreader', function () {
-        var bookReader = new IslandoraBookReader(settings.islandoraBookReader);
+      $('.islandora-internet-archive-bookreader', context).once('islandora-bookreader', function () {
+        var bookReader = new IslandoraBookReader(settings.islandoraInternetArchiveBookReader);
 
         /**
          * @todo reorganize this

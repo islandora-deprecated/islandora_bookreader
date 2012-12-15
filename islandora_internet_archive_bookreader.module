@@ -9,27 +9,27 @@
 /**
  * Implements hook_menu().
  */
-function islandora_bookviewer_menu() {
+function islandora_internet_archive_bookreader_menu() {
   return array(
-    'admin/islandora/bookreader' => array(
+    'admin/islandora/internet_archive_bookreader' => array(
       'title' => 'Internet Archive BookReader',
       'description' => 'Configure the Internet Archive BookReader.',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('islandora_bookreader_admin_settings_form'),
+      'page arguments' => array('islandora_internet_archive_bookreader_admin_settings_form'),
       'access arguments' => array('administer site configuration'),
       'file' => 'islandora_bookreader.admin.inc',
       'type' => MENU_NORMAL_ITEM,
     ),
-    'bookreader_ocr/%islandora_object' => array(
-      'page callback' => 'islandora_bookreader_get_ocr',
+    'internet_archive_bookreader_ocr/%islandora_object' => array(
+      'page callback' => 'islandora_internet_archive_bookreader_get_page_ocr',
       'page arguments' => array(2),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(FEDORA_VIEW, 2),
       'file' => 'includes/ocr.callback.inc',
       'type' => MENU_CALLBACK,
     ),
-    'bookreader_search/%/%' => array(
-      'page callback' => 'islandora_bookviewer_search',
+    'internet_archive_bookreader_search/%/%' => array(
+      'page callback' => 'islandora_internet_archive_bookreader_search',
       'page arguments' => array(1, 2),
       'access callback' => 'user_access',
       'access arguments' => array(FEDORA_VIEW),
@@ -42,11 +42,11 @@ function islandora_bookviewer_menu() {
 /**
  * Implements hook_theme().
  */
-function islandora_bookviewer_theme() {
+function islandora_internet_archive_bookreader_theme() {
   return array(
-    'islandora_bookviewer_internet_archive_bookreader' => array(
+    'islandora_internet_archive_bookreader' => array(
       'file' => 'theme/islandora_bookreader.theme.inc',
-      'template' => 'theme/islandora-bookviewer-internet-archive-bookreader',
+      'template' => 'theme/islandora-internet-archive-bookreader',
       'variables' => array(
         'object' => NULL,
         'page_progression' => 'lr',
@@ -55,8 +55,8 @@ function islandora_bookviewer_theme() {
         'width' => 600
       )
     ),
-    'islandora_bookviewer_info' => array(
-      'file' => 'theme/islandora_bookreader.theme.inc',
+    'islandora_internet_archive_bookreader_book_info' => array(
+      'file' => 'theme/islandora_internet_archive_bookreader.theme.inc',
       'variables' => array('object' => NULL),
     )
   );
@@ -65,14 +65,14 @@ function islandora_bookviewer_theme() {
 /**
  * Implements hook_islandora_viewer_info().
  */
-function islandora_bookviewer_islandora_viewer_info() {
+function islandora_internet_archive_bookreader_islandora_viewer_info() {
   return array(
-    'islandora_bookviewer' => array(
+    'islandora_internet_archive_bookreader' => array(
       'label' => t('Internet Archive BookReader'),
-      'description' => t('Internet Archive BookReader with Djatoka as tilesource.'),
-      'configuration' => 'admin/islandora/bookreader',
-      'callback' => 'islandora_bookviewer_viewer_callback',
-      'mimetype' => array('image/jp2'),
+      'description' => t('Internet Archive BookReader.'),
+      'configuration' => 'admin/islandora/internet_archive_bookreader',
+      'callback' => 'islandora_internet_archive_bookreader_viewer_callback',
+      'model' => array('islandora:iabookCModel'),
     ),
   );
 }
@@ -86,6 +86,6 @@ function islandora_bookviewer_islandora_viewer_info() {
  * @return string
  *  HTML repersentation of the OpenSeadragon viewer
  */
-function islandora_bookviewer_viewer_callback(array $params) {
+function islandora_internet_archive_bookreader_viewer_callback(array $params) {
   return theme('islandora_bookviewer_internet_archive_bookreader', $params);
 }
