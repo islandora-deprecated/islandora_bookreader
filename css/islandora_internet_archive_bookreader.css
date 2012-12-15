@@ -1,15 +1,18 @@
 div#BookReader {
   position: static;
+  overflow-y: hidden;
 }
 div#BRtoolbar {
-  position: static;
+  position: relative;
+  margin-bottom: -40px;
 }
 div#BRcontainer {
   position: relative;
-  height: 600px;
+  height: 680px;
 }
 div#BRnav {
-  position: static;
+  position: relative;
+  margin-top: -40px;
 }
 div.BRpagediv1up {
  overflow: visible;
