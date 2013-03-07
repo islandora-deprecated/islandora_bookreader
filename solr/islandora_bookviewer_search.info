@@ -3,5 +3,5 @@ description = Module for custom search results for the bookviewer adds page numb
 dependencies[] = islandora_solr_search
 description = Customizes Islandora solr search
 package = Islandora Search
-version = 6.x-13.1-RC1
+version = 6.x-13.1
 core = 6.x

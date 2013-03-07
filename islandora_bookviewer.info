@@ -4,5 +4,5 @@ dependencies[] = tabs
 dependencies[] = islandora_solr_search
 description = Islandora Bookviewer based on the archive.org bookviewer.
 package = Islandora
-version = 6.x-13.1-RC1
+version = 6.x-13.1
 core = 6.x
